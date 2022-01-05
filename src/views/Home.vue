@@ -5,7 +5,7 @@
           <v-app-bar-title min-width="400">绘制流程图</v-app-bar-title>
       <div class="editBtn">
         <v-btn @click="flowToJSON"  color="secondary" class="mx-5">生成json数据</v-btn>
-        <v-btn @click="reloadData" color="success" class="mx-5">回显数据</v-btn>
+        <v-btn @click="reloadData(null)" color="success" class="mx-5">回显数据</v-btn>
         <v-file-input hide-input truncate-length="25"  @change="loadFile" accept="application/json" class="mx-5"></v-file-input>
       </div>
       <v-dialog v-model="showDelDialog">
@@ -45,7 +45,7 @@
           
             <v-list nav dense >
               <v-list-group
-                v-for="item in items"
+                v-for="item in listItem"
                 :key="item.title"
                 v-model="item.active"
                 :prepend-icon="item.action"
@@ -81,7 +81,7 @@
         </div>
       </div>
       <v-navigation-drawer
-            
+            :hide-overlay="true"
             v-model="rightOverlay.active"
             absolute
             right
@@ -136,7 +136,7 @@ import { jsPlumb } from "jsplumb"
 import { nodeTypeList } from './config/init'
 import { jsplumbSetting, jsplumbConnectOptions, jsplumbSourceOptions, jsplumbTargetOptions } from './config/commonConfig'
 import methods from "./config/methods"
-import data from './config/data.json'
+import jsonData from './config/data.json'
 import flowNode from "./components/node-item"
 export default {
   name: "FlowEdit",
@@ -170,7 +170,7 @@ export default {
         height: 0,
         width: 0
       },
-      items: [
+      listItem: [
         {
           action: 'mdi-ticket',
           items: [{ title: '表单项' }],
@@ -255,13 +255,17 @@ export default {
       console.log(body);
     },
     reloadData(innerData){
+      if(!innerData){
+        innerData = jsonData;
+      }
       this.jsPlumb.reset();
       this.data.lineList = [];
       this.data.nodeList = [];
       //深拷贝json数据
       let dataD = JSON.parse(JSON.stringify(innerData));
 
-      this.data.lineList = dataD.lineList
+      this.data.lineList = dataD.lineList;
+      console.log(dataD.nodeList);
       dataD.nodeList.map(v => {
         this.data.nodeList.push(v)
       })
