@@ -1,0 +1,11 @@
+{
+    "nodeList":[
+        {"title":"Breakfast & brunch","message":"这是详情信息","id":"328ql2sztfw000","top":"210px","left":"145px"},
+        {"title":"New American","message":"这是详情信息","id":"561zdjk6i5g000","top":"180px","left":"480px"},
+        {"title":"Sushi","message":"这是详情信息","id":"55admbkf3a8000","top":"220px","left":"720px"}
+        ],
+    "lineList":[
+        {"from":"328ql2sztfw000","to":"561zdjk6i5g000","label":"连线名称","id":"3r9ouzt8fpg000","Remark":""},
+        {"from":"561zdjk6i5g000","to":"55admbkf3a8000","label":"连线名称","id":"1ewctb0cr6ow00","Remark":""}
+        ]
+}
