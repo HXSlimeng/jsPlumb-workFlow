@@ -1,6 +1,6 @@
 <template>
   <div class="node-item" ref="node" 
-    :class="[(isActive || isSelected) ? 'active' : '', node.disabled ? 'nodedisab' : '']"
+    :class="[(isActive || isSelected) ? 'active' : '', {nodedisab:node.disabled},{lastNode:node.last}]"
     :style="flowNodeContainer"
     v-click-outside="setNotActive"
     @click="setActive"
@@ -9,68 +9,42 @@
     @contextmenu.prevent="onContextmenu">
     <!-- @dblclick.prevent="editNode" -->
     <v-icon v-if="node.hasOwnProperty('disabled')">mdi-database-outline</v-icon>
-    <div class="nodeName">{{node.title}}</div>
+    <div class="nodeName">{{node.node_type}}</div>
+
+    <v-btn fab dark x-small color="primary" @click.stop="formInfoShow = true" v-if="node.submit" class="configParamBtn">
+      <v-icon dark>mdi-file-document-edit-outline</v-icon>
+    </v-btn>
       <!--连线用--//触发连线的区域-->
-      <div class="node-anchor anchor-top" v-show="mouseEnter && !node.disabled"></div>
-      <div class="node-anchor anchor-right" v-show="mouseEnter && !node.disabled"></div>
-      <div class="node-anchor anchor-bottom" v-show="mouseEnter && !node.disabled"></div>
-      <div class="node-anchor anchor-left" v-show="mouseEnter && !node.disabled"></div>
-        <v-dialog v-model="formInfoShow" max-width="600">
+      <div class="node-anchor anchor-top" v-show="ifShownodeAnchor"></div>
+      <div class="node-anchor anchor-right" v-show="ifShownodeAnchor"></div>
+      <div class="node-anchor anchor-bottom" v-show="ifShownodeAnchor"></div>
+      <div class="node-anchor anchor-left" v-show="ifShownodeAnchor"></div>
+      <!-- 配置数据弹出框 -->
+        <v-dialog v-model="formInfoShow" max-width="600" :hide-overlay="false" :no-click-animation="true">
           <v-card class=" pa-10">
+            <v-card-title class="pt-1 text-h5">
+              配置参数
+            </v-card-title>
+            <v-btn @click="getParentParams">获取父节点参数</v-btn>
             <v-form
               ref="form"
               lazy-validation
             >
+            <div v-for="(config,key) in node.parameters" :key="key">
               <v-text-field
-                :counter="10"
-                label="数据库名称"
-                v-model="connectFrom.dataBaseName"
+                v-if="key.indexOf('_file')==-1 && !(key=='additional_run_kwargs')"  
+                :label="key"
+                v-model="node.parameters[key]"
                 required
+                outlined
+                height="10px"
               ></v-text-field>
-
-              <v-text-field
-                label="邮件"
-                required
-              ></v-text-field>
-
-              <v-select
-                label="Item"
-                required
-              ></v-select>
-
-              <!-- <v-checkbox
-                label="Do you agree?"
-                required
-              ></v-checkbox> -->
-
-             <!--  <v-btn
-                :disabled="!valid"
-                color="success"
-                class="mr-4"
-                @click="validate"
-              >
-                检验
-              </v-btn>
-
-              <v-btn
-                color="error"
-                class="mr-4"
-                @click="reset"
-              >
-                重置
-              </v-btn>
-
-              <v-btn
-                color="warning"
-                @click="resetValidation"
-              >
-                重置检验
-              </v-btn> -->
+            </div>
             </v-form>
-            <v-divider></v-divider>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="connectToDatabase" :loading = "dataBaseFetching">提交</v-btn>
+              <v-btn color="primary" @click="completeFill" >完成</v-btn>
+              <v-btn color="secondary" @click="connectToDatabase" :loading="dataBaseFetching" :disabled="!node.submit_result">计算数据</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -81,7 +55,7 @@
           </v-card>
         </v-dialog>
         <v-tooltip top color="warning" :activator="getNode()" v-if="node.disabled">
-          <v-icon color="white" size="18px">mdi-alert-circle</v-icon><span>请先连接数据库</span>
+          <v-icon color="white" size="18px">mdi-alert-circle</v-icon><span>请先配置参数</span>
         </v-tooltip>
   </div>
 </template>
@@ -105,6 +79,9 @@ export default {
           left: this.node.left
         };
       }
+    },
+    ifShownodeAnchor(){
+      return this.mouseEnter && !this.node.disabled && !this.node.last;
     }
     
   },
@@ -159,7 +136,7 @@ export default {
           }
         },
         {
-          label: '连接数据库',
+          label: '配置参数',
           disabled: false,
           icon: "",
           onClick: () => {
@@ -185,7 +162,7 @@ export default {
       this.isActive = true
       this.isSelected = false
       setTimeout(() => {
-        this.$emit("changeLineState", this.node.id, true)
+        this.$emit("changeLineState", this.node.node_id, true)
       },0)
     },
     setNotActive() {
@@ -195,7 +172,7 @@ export default {
       if(!this.isActive) {
         return
       }
-      this.$emit("changeLineState", this.node.id, false)
+      this.$emit("changeLineState", this.node.node_id, false)
       this.isActive = false
     },
     editNode() {
@@ -215,7 +192,7 @@ export default {
           })
         },
         onOk: () => {
-          this.$emit('setNodeName', this.node.id, this.newNodeName)
+          this.$emit('setNodeName', this.node.node_id, this.newNodeName)
         }
       })
     },
@@ -228,31 +205,85 @@ export default {
       (function (params) {
       return new Promise((resolve,reject,pendding)=>{
         setTimeout(() => {
-          let dataBase = _this.connectFrom.dataBaseName;
-          resolve(dataBase)
+         let success = true;
+         for (const key in _this.node.parameters) {
+           if (_this.node.parameters.hasOwnProperty.call(_this.node.parameters, key)) {
+             const element = _this.node.parameters[key];
+              if (element == '') {
+                success = false;
+              }
+           }
+         }
+         /* if (_this.node.parameters.find(v=>!!v)) {
+           success = false;
+         } */
+         let result = {
+          node_result:{
+                X:[123],// 输出的二维数据，行列不定
+                Y:[123], // 输出的标签数据，一般是一维数据
+                addtional_node_info:{}, // 节点的统计分析信息
+              },
+          node_exec_state:{
+                state:"success", //节点执行状态
+                state_id:0, // 节点执行的状态id代号
+                fail_info:"" // 执行失败的辅助信息
+              }
+         }
+         if (!success) {
+           result.node_exec_state.state = 'fail'
+           result.node_exec_state.fail_info = '操作失败'
+         }
+          resolve(result)
         }, 2000);
       })
     })().then(res =>{
-      this.$nextTick(()=>{
-        this.$parent.jsPlumb.makeTarget(this.node.id, this.$parent.jsplumbTargetOptions);
-      })
-      this.dataBaseFetching = false;
-      this.node.dataBase = res;
+      
+      let { node_result,node_exec_state} = res;
+        this.node.node_result = node_result;
+        this.node.node_exec_state = node_exec_state;
+
+      if (res.node_exec_state.state == 'success') {
+        this.$emit("ctlRightOverLay",this.node,this.isActive)
+        this.$nextTick(()=>{
+          this.$parent.jsPlumb.makeTarget(this.node.node_id, this.$parent.jsplumbTargetOptions);
+        })
+        this.$message.alertMessage('操作成功！')
+        this.dataBaseFetching = false;
+        this.formInfoShow = false;
+        delete this.node.disabled
+        //重新刷新列表数据
+        
+      }else{
+        this.dataBaseFetching = false;
+        this.$message.alertMessage(node_exec_state.fail_info)
+      }
+      // this.node.dataBase = res;
+
+      // this.$parent.setListDisable('精选');
+      }).catch(err=>{
+        console.log(err);
+        this.dataBaseFetching = false;
+        })
+    },
+    completeFill(){
       this.formInfoShow = false;
-      this.node.disabled = false;
-      this.$parent.setListDisable('精选');
-      }).catch(err=>{console.log(err);})
     },
     getNode(){
-      return document.getElementById(this.node.id);
+      return document.getElementById(this.node.node_id);
+    },
+    globalMessage(val){
+      this.$parent.alertMessage(val);
+    },
+    getParentParams(){
+      this.$emit('getParentParams',this.node.node_id)
     }
   },
   mounted(){
   },
   created(){
-      if (this.node.title == '数据源') {
-        this.node.disabled = true; 
-      }
+    if (this.node.submit) {
+      this.node.disabled = true;
+    }
   }
 };
 </script>
@@ -293,6 +324,8 @@ export default {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .configParamBtn{
+  }
   .node-anchor {
     display: flex;
     position: absolute;
@@ -332,7 +365,14 @@ export default {
   border-left: solid 10px rgb(145, 170, 157);
 }
 .nodedisab{
-  opacity: .5;
+  background: rgba(209, 219, 189, .4); 
+  border-left: solid 10px rgba(145, 170, 157,.4);
+  color: rgba(0,0,0,0.4);
+}
+.lastNode{
+  background: #BDBDBD;
+  border-left: solid 10px #616161;
+  
 }
 
 </style>
