@@ -65,6 +65,14 @@ const methods = {
         id: GenNonDuplicateID(8),
         Remark: ""
       });
+      let faParam, sonParam;
+      //连线成功将父节点的参数传递给子节点
+    faParam =  this.data.nodeList.find(v=>v.node_params.node_id==from);
+    sonParam = this.data.nodeList.find(item=>item.node_params.node_id==to);
+    faParam.node_result ? sonParam.resource_params.push({
+      from:from,
+      faParam:faParam.node_result
+    }) : '';
     });
   },
   draggableNode(nodeId) {
@@ -129,8 +137,10 @@ const methods = {
       this.addNode(temp);
   },
   addLine(line) {
+    console.log(line);
     let from = line.source.id;
     let to = line.target.id;
+    
     this.data.lineList.push({
       from: from,
       to: to,
@@ -138,7 +148,7 @@ const methods = {
       id: GenNonDuplicateID(8),
       Remark: ""
     });
-    console.log(this.data.linelist);
+    
   },
   confirmDelLine(line) {
     this.showDelDialog = true;

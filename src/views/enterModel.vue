@@ -253,7 +253,7 @@ export default {
                 submit_result: false,
                 last: true,
               },
-              resource_params:{}, 
+              resource_params:[], 
               op_params: {}, 
               train_params: {
                   xls_file: "./client_demo/data/iris.xlsx", 
@@ -278,7 +278,7 @@ export default {
                 submit_result: true,
                 last: false,
               },
-              resource_params:{}, 
+              resource_params:[], 
               op_params: {}, 
               train_params: {
                   xls_file: "./client_demo/data/iris.xlsx", 
@@ -303,7 +303,7 @@ export default {
                 submit_result: false,
                 last: false,
               },
-              resource_params:{}, 
+              resource_params:[], 
               op_params: {}, 
               train_params: {
                   xls_file: "./client_demo/data/iris.xlsx", 
@@ -317,7 +317,6 @@ export default {
                   },
                   predict_params: {},
               },
-              
             },
           ],
           node_type: '数据预处理',
@@ -414,7 +413,7 @@ export default {
     this.jsPlumb = jsPlumb.getInstance();
     let modelInfo = this.$route.params.modelInfo;
     if (modelInfo) {
-      this.reloadData(modelInfo)
+      this.reloadData(modelInfo);
     }
 
   },

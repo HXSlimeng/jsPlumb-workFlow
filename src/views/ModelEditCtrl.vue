@@ -6,7 +6,7 @@
             <template #activator="{ on, attrs }">
             <v-btn color="red lighten-2"
                     dark
-                    class="mx-10"
+                    class="mr-16"
                     v-bind="attrs"
                     v-on="on">
                     <v-icon>mdi-plus</v-icon>创建流程图</v-btn>
