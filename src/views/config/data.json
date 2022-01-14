@@ -1,1 +1,127 @@
-{"nodeList":[{"title":"List Item","id":"3k8mn1w4g4k000","top":"160px","left":"440px"},{"title":"List Item","id":"2jbe8iktlie000","top":"280px","left":"480px"},{"title":"List Item","id":"5qk8bxtwxvk000","top":"405px","left":"440px"}],"lineList":[{"from":"3k8mn1w4g4k000","to":"2jbe8iktlie000","label":"连线名称","id":"5s20afot65s000","Remark":""},{"from":"2jbe8iktlie000","to":"5qk8bxtwxvk000","label":"连线名称","id":"355ei68hp6c000","Remark":""}]}
+{
+    "datalist": [
+        {
+            
+            "graph_param": {
+                "graph_name": "demo_graph",
+                "graph_id": "graph_index_1",
+                "graph_message":"描述信息",
+                "graph_createTime":"2022-01-14",
+                "graph_type": "json_graph"
+              },
+            "nodeList": [
+                {
+                    "node_params": {
+                        "node_type": "根节点",
+                        "message": "这是详情信息",
+                        "node_name": "nodeName",
+                        "submit": false,
+                        "submit_result": false,
+                        "last": true,
+                        "node_id": "3sljxxsw41a000",
+                        "top": "300px",
+                        "left": "260px"
+                    },
+                    "resource_params": {},
+                    "op_params": {},
+                    "train_params": {
+                        "xls_file": "./client_demo/data/iris.xlsx",
+                        "sheet": "",
+                        "min_row": "",
+                        "min_col": "",
+                        "max_row": "",
+                        "max_col": "",
+                        "additional_run_kwargs": {
+                            "submit_result": false
+                        },
+                        "predict_params": {}
+                    }
+                },
+                {
+                    "node_params": {
+                        "node_type": "数据源",
+                        "message": "这是详情信息",
+                        "node_name": "nodeName",
+                        "submit": true,
+                        "submit_result": true,
+                        "last": false,
+                        "node_id": "mgq1bsekpuo00",
+                        "top": "70px",
+                        "left": "270px"
+                    },
+                    "resource_params": {},
+                    "op_params": {},
+                    "train_params": {
+                        "xls_file": "./client_demo/data/iris.xlsx",
+                        "sheet": "1",
+                        "min_row": "2",
+                        "min_col": "3",
+                        "max_row": "4",
+                        "max_col": "5",
+                        "additional_run_kwargs": {
+                            "submit_result": false
+                        },
+                        "predict_params": {}
+                    },
+                    "node_result": {
+                        "X": [
+                            123
+                        ],
+                        "Y": [
+                            123
+                        ],
+                        "addtional_node_info": {}
+                    },
+                    "node_exec_state": {
+                        "state": "success",
+                        "state_id": 0,
+                        "fail_info": ""
+                    }
+                },
+                {
+                    "node_params": {
+                        "node_type": "普通数据",
+                        "message": "这是详情信息",
+                        "node_name": "nodeName",
+                        "submit": false,
+                        "submit_result": false,
+                        "last": false,
+                        "node_id": "3968wqtcsk8000",
+                        "top": "195px",
+                        "left": "245px"
+                    },
+                    "resource_params": {},
+                    "op_params": {},
+                    "train_params": {
+                        "xls_file": "./client_demo/data/iris.xlsx",
+                        "sheet": "",
+                        "min_row": "",
+                        "min_col": "",
+                        "max_row": "",
+                        "max_col": "",
+                        "additional_run_kwargs": {
+                            "submit_result": false
+                        },
+                        "predict_params": {}
+                    }
+                }
+            ],
+            "lineList": [
+                {
+                    "from": "mgq1bsekpuo00",
+                    "to": "3968wqtcsk8000",
+                    "label": "连线名称",
+                    "id": "3tkqta88pvs000",
+                    "Remark": ""
+                },
+                {
+                    "from": "3968wqtcsk8000",
+                    "to": "3sljxxsw41a000",
+                    "label": "连线名称",
+                    "id": "3dv3euoqbr0000",
+                    "Remark": ""
+                }
+            ]
+        }
+    ]
+}

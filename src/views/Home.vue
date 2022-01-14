@@ -29,7 +29,6 @@
       </v-card>
       </v-dialog>
     </v-app-bar>
-
     <div class="flow_region">
       <div >
         <!-- <div v-for="item in nodeTypeList" :key="item.type" class="node" draggable="true" @dragstart="drag($event, item)">
@@ -42,143 +41,91 @@
             v-model="leftBarVis"
             absolute
             :hide-overlay="true"
-            :stateless="true"
           >
           
             <v-list nav dense >
               <v-list-group
                 v-for="item in listItem"
-                :key="item.node_type"
+                :key="item.title"
                 v-model="item.active"
+                :prepend-icon="item.action"
                 no-action
               >
-              <template #prependIcon>
-                <v-icon color="#f5c16c">{{item.active ? 'mdi-folder-open' : 'mdi-folder'}}</v-icon>
-              </template>
               <template #activator>
                 <v-list-item-content>
-                  <v-list-item-title v-text="item.node_type"></v-list-item-title>
+                  <v-list-item-title v-text="item.title"></v-list-item-title>
                 </v-list-item-content>
               </template>
                 <v-list-item
                   v-for="child in item.items"
                   :disabled="child.disabled"
-                  :key="child.node_type"
+                  :key="child.title"
                   draggable="true"
                   @dragstart="drag($event, child)"
                 >
-
-                    <v-icon color="#f5c16c">mdi-folder</v-icon>
                   <v-list-item-content>
-                    <v-list-item-title v-text="child.node_type"></v-list-item-title>
+                    <v-list-item-title v-text="child.title"></v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
               </v-list-group>
             </v-list>
        </v-navigation-drawer>
-
       </div>
       <div id="flowWrap" ref="flowWrap" class="flow-wrap" @drop="drop($event)" @dragover="allowDrop($event)">
         <div id="flow">
           <div v-show="auxiliaryLine.isShowXLine" class="auxiliary-line-x" :style="{width: auxiliaryLinePos.width, top:auxiliaryLinePos.y + 'px', left: auxiliaryLinePos.offsetX + 'px'}"></div>
           <div v-show="auxiliaryLine.isShowYLine" class="auxiliary-line-y" :style="{height: auxiliaryLinePos.height, left:auxiliaryLinePos.x + 'px', top: auxiliaryLinePos.offsetY + 'px'}"></div>
           
-          <flowNode v-for="item in data.nodeList" :id="item.node_id" :key="item.node_id" :node="item" @setNodeName="setNodeName" @deleteNode = "deleteNode" @changeLineState="changeLineState" @ctlRightOverLay="ctlRightOverLay" @getParentParams="getParentParams">
-
-          </flowNode>
+          <flowNode v-for="item in data.nodeList" :id="item.id" :key="item.id" :node="item" @setNodeName="setNodeName" @deleteNode = "deleteNode" @changeLineState="changeLineState" @ctlRightOverLay="ctlRightOverLay"></flowNode>
         
         </div>
       </div>
-
       <v-navigation-drawer
             :hide-overlay="true"
             v-model="rightOverlay.active"
             absolute
             right
-            :stateless="true"
-            width="600"
-            :expand-on-hover="false"
-            height="94%"
           >
           <template v-slot:prepend>
-            <v-list-item two-line>
-              <v-list-item-avatar color="#D1DBBD">
-                <v-icon>mdi-pencil</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-title class="text-h4">{{rightOverlay.info.node_type}}</v-list-item-title>
-                <v-list-item-subtitle>副标题</v-list-item-subtitle>
-              </v-list-item-content>
-              <div class="d-flex justify-center align-center" >
-                  <v-btn
-                    @click="rightOverlay.active = false "
-                    color="error"
-                    >
-                    关闭
-                    </v-btn>
-              </div>
-            </v-list-item>
-          </template>
-              <v-tabs
-                background-color="#e2ded3"
-                color="#1a2639"
-                v-model="rightOverlayTabs"
-                @change="rightOverylayTabsChange"
-                class="tabsCtl"
-              >
-                <v-tab>基本数据</v-tab>
-                <v-tab>图表</v-tab>
-              </v-tabs>
-        <v-tabs-items v-model="rightOverlayTabs">
-          <v-tab-item>
-            <v-list dense>
-              <v-list-item
-                v-for="(item,index) in rightOverlay.info"
-                :key="item.node_id"
-              >
-                  <template v-if="typeof item == 'object'">
-                   <v-expansion-panels :accordion="true" >
-                    <v-expansion-panel>
-                      <v-expansion-panel-header color="#daeaf6">
-                        {{index}}
-                      </v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <v-list>
-                          <v-list-item v-for="(v,index) in item" :key="index">
-                            <v-list-item-content>{{index}}:</v-list-item-content>
-                            <v-list-item-content>{{v}}</v-list-item-content>
-                          </v-list-item>
-                        </v-list>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
-                    </v-expansion-panels>
-                  </template>
-                  <template v-else>
-                    <v-list-item-icon>
-                      {{index}}:
-                    </v-list-item-icon>
-                    <v-list-item-content>
-                      <v-list-item-title>{{ item }}</v-list-item-title>
-                    </v-list-item-content>
-                  </template>
-              </v-list-item>
-            </v-list>
-          </v-tab-item>
-          <v-tab-item v-if="rightOverlay.info">
-            <v-card height="400px" class="mx-2 my-2">
-              <v-card-title class="my-0 text-h5">数据分析饼图</v-card-title>
-              <div id="pieChart" ></div>
-            </v-card>
-            <v-card height="400px" class="mx-2 my-2">
-              <v-card-title class="my-0 text-h5">数据分析柱形图</v-card-title>
-              <div id="basicBar"></div>
-            </v-card>
-          </v-tab-item>
-        </v-tabs-items>
+        <v-list-item two-line>
+          <v-list-item-avatar color="#D1DBBD">
+            <v-icon>mdi-pencil</v-icon>
+            <!-- <img src="https://randomuser.me/api/portraits/women/81.jpg"> -->
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-list-item-title>{{rightOverlay.info.title}}</v-list-item-title>
+            <v-list-item-subtitle>副标题</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+
+      <v-divider></v-divider>
+
+      <v-list dense>
+        <v-list-item
+          v-for="(item,index) in rightOverlay.info"
+          :key="item.id"
+        >
+          <v-list-item-icon>
+            <v-icon>{{index}}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>{{ item }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+      <div class="d-flex justify-center align-center mt-10" >
+          <v-btn
+            @click="rightOverlay.active = false "
+            color="error"
+            outlined>
+            关闭
+            </v-btn>
+      </div>
        </v-navigation-drawer>
     </div>
-
-    
 
     
   </div>
@@ -189,7 +136,7 @@ import { jsPlumb } from "jsplumb"
 import { nodeTypeList } from './config/init'
 import { jsplumbSetting, jsplumbConnectOptions, jsplumbSourceOptions, jsplumbTargetOptions } from './config/commonConfig'
 import methods from "./config/methods"
-import jsonData from './config/data copy.json'
+import jsonData from './config/data.json'
 import flowNode from "./components/node-item"
 export default {
   name: "FlowEdit",
@@ -226,91 +173,43 @@ export default {
       listItem: [
         {
           action: 'mdi-ticket',
-          items: [{ node_type: 'csv文件读取' }],
-          node_type: '数据载入类',
+          items: [{ title: '表单项' }],
+          title: '景点',
         },
         {
           action: 'mdi-silverware-fork-knife',
+          active: true,
           items: [
-            { 
-              node_type: "数据源",
-              message: "这是详情信息",
-              node_name: "nodeName",
-              parameters: {
-                  xls_file: "./client_demo/data/iris.xlsx", 
-                  sheet:"", 
-                  min_row:"", 
-                  min_col:"", 
-                  max_row:"", 
-                  max_col:"" ,
-                  additional_run_kwargs: {
-                    submit_result: false 
-                  }
-              },
-              submit: true,
-              submit_result: true,
-              last: false,
-            },
-            { 
-              node_type: "基本数据源",
-              message: "这是详情信息",
-              node_name: "nodeName",
-              parameters: {
-                  xls_file: "./client_demo/data/iris.xlsx", 
-                  sheet:"", 
-                  min_row:"", 
-                  min_col:"", 
-                  max_row:"", 
-                  max_col:"" ,
-                  additional_run_kwargs: {
-                    submit_result: false 
-                  }
-              },
-              submit: false,
-              submit_result: false,
-              last: false,
-            },
-            { 
-              node_type: "尾节点",
-              message: "这是详情信息",
-              node_name: "nodeName",
-              parameters: {
-                  xls_file: "./client_demo/data/iris.xlsx", 
-                  sheet:"", 
-                  min_row:"", 
-                  min_col:"", 
-                  max_row:"", 
-                  max_col:"" ,
-                  additional_run_kwargs: {
-                    submit_result: false 
-                  }
-              },
-              submit: false,
-              submit_result: false,
-              last: true,
-            },
+            { title: '数据源', message:'这是详情信息' },
+            { title: '饭店',message:'这是详情信息'  },
+            { title: '精选',message:'这是详情信息'  },
           ],
-          node_type: '数据预处理',
+          title: '晚餐',
         },
         {
           action: 'mdi-school',
-          items: [{ node_type: '表单项' }],
-          node_type: '机器学习算法',
+          items: [{ title: '表单项' }],
+          title: '教育',
         },
         {
           action: 'mdi-run',
-          items: [{ node_type: '表单项' }],
-          node_type: '统计学习类算法',
+          items: [{ title: '表单项' }],
+          title: '家庭',
+        },
+        {
+          action: 'mdi-bottle-tonic-plus',
+          items: [{ title: '表单项' }],
+          title: '健康',
         },
         {
           action: 'mdi-content-cut',
-          items: [{ node_type: '表单项' }],
-          node_type: '办公室',
+          items: [{ title: '表单项' }],
+          title: '办公室',
         },
         {
           action: 'mdi-tag',
-          items: [{ node_type: '表单项' }],
-          node_type: '促销活动',
+          items: [{ title: '表单项' }],
+          title: '促销活动',
         },
       ],
       leftBarVis:true,
@@ -319,63 +218,6 @@ export default {
         info:{},
         active:false
       },
-      rightOverlayTabs:null,
-      chartsOpt:{
-        pieOption: {
-                title: {
-                  text: 'Referer of a Website',
-                  subtext: 'Fake Data',
-                  left: 'center'
-                },
-                tooltip: {
-                  trigger: 'item'
-                },
-                /* legend: {
-                  orient: 'vertical',
-                  left: 'left'
-                }, */
-                series: [
-                  {
-                    name: 'Access From',
-                    type: 'pie',
-                    radius: '40%',
-                    data: [
-                      { value: 1048, name: 'Search Engine' },
-                      { value: 735, name: 'Direct' },
-                      { value: 580, name: 'Email' },
-                      { value: 484, name: 'Union Ads' },
-                      { value: 300, name: 'Video Ads' }
-                    ],
-                    emphasis: {
-                      itemStyle: {
-                        shadowBlur: 10,
-                        shadowOffsetX: 0,
-                        shadowColor: 'rgba(0, 0, 0, 0.5)'
-                      }
-                    }
-                  }
-                ]
-        },
-        basicBarOpt: {
-          xAxis: {
-          type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-          },
-          yAxis: {
-            type: 'value'
-          },
-          series: [
-            {
-              data: [120, 200, 150, 80, 70, 110, 130],
-              type: 'bar',
-              showBackground: true,
-              backgroundStyle: {
-                color: 'rgba(180, 180, 180, 0.2)'
-              }
-            }
-          ]
-        }
-      }
     };
   },
   mounted() {
@@ -408,6 +250,7 @@ export default {
       }) */
     },
     flowToJSON(){
+      console.log(this.data);
       let body =  JSON.stringify(this.data);
       console.log(body);
     },
@@ -422,6 +265,7 @@ export default {
       let dataD = JSON.parse(JSON.stringify(innerData));
 
       this.data.lineList = dataD.lineList;
+      console.log(dataD.nodeList);
       dataD.nodeList.map(v => {
         this.data.nodeList.push(v)
       })
@@ -438,35 +282,6 @@ export default {
         _this.reloadData(JSON.parse(this.result))
         }
     },
-    rightOverylayTabsChange(val){
-      if (val == 1) {
-        setTimeout(() => {
-          let pie = document.getElementById('pieChart')
-          let basicBar = document.getElementById('basicBar')
-          let pieChart = this.$echarts.init(pie);
-          let barChart = this.$echarts.init(basicBar);
-          pieChart.setOption(this.chartsOpt.pieOption);
-          barChart.setOption(this.chartsOpt.basicBarOpt);
-        }, 0);
-      }
-    },
-    getParentParams(nodeId){
-      let parentIds = []; 
-      let parentCollect = []; 
-      this.data.lineList.forEach((v)=>{
-        if (v.to == nodeId) {
-          parentIds.push(v.from)
-        }
-      })
-      this.data.nodeList.forEach((v)=>{
-        if (parentIds.indexOf(v.node_id) > -1) {
-          parentCollect.push(v);
-        }
-      })
-      console.log(parentCollect);
-      return parentCollect;
-    }
-
   }
 };
 </script>
@@ -517,8 +332,7 @@ export default {
     overflow: hidden;
     outline: none !important;
     flex-grow: 1;
-    // background-image: url("../assets/point.png");
-    background: #daeaf6;
+    /* background-image: url("../assets/point.png"); */
     #flow {
       position: relative;
       width: 100%;
@@ -558,18 +372,5 @@ export default {
   to {
     stroke-dashoffset: 0;
   }
-}
-#pieChart{
-  height: 350px;
-  width: 350px;
-  margin: 0 auto;
-}
-#basicBar{
-  #pieChart()
-}
-.tabsCtl{
-  position: sticky;
-  top: 0;
-  z-index: 2;
 }
 </style>

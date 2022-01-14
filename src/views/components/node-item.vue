@@ -1,17 +1,18 @@
 <template>
   <div class="node-item" ref="node" 
-    :class="[(isActive || isSelected) ? 'active' : '', {nodedisab:node.disabled},{lastNode:node.last}]"
+    :class="[(isActive || isSelected) ? 'active' : '', {nodedisab:nodeParams.disabled},{lastNode:nodeParams.last}]"
     :style="flowNodeContainer"
     v-click-outside="setNotActive"
-    @click="setActive"
     @mouseenter="showAnchor"
     @mouseleave="hideAnchor"
-    @contextmenu.prevent="onContextmenu">
+    @click="setActive"
+    @contextmenu.prevent="onContextmenu"
+    >
     <!-- @dblclick.prevent="editNode" -->
-    <v-icon v-if="node.hasOwnProperty('disabled')">mdi-database-outline</v-icon>
-    <div class="nodeName">{{node.node_type}}</div>
+    <v-icon v-if="nodeParams.hasOwnProperty('disabled')">mdi-database-outline</v-icon>
+    <div class="nodeName">{{nodeParams.node_type}}</div>
 
-    <v-btn fab dark x-small color="primary" @click.stop="formInfoShow = true" v-if="node.submit" class="configParamBtn">
+    <v-btn fab dark x-small color="primary" @click.stop="formInfoShow = true" v-if="nodeParams.submit" class="configParamBtn">
       <v-icon dark>mdi-file-document-edit-outline</v-icon>
     </v-btn>
       <!--连线用--//触发连线的区域-->
@@ -21,20 +22,21 @@
       <div class="node-anchor anchor-left" v-show="ifShownodeAnchor"></div>
       <!-- 配置数据弹出框 -->
         <v-dialog v-model="formInfoShow" max-width="600" :hide-overlay="false" :no-click-animation="true">
-          <v-card class=" pa-10">
-            <v-card-title class="pt-1 text-h5">
-              配置参数
+          <v-card>
+           <v-card-title class="text-h6 grey lighten-2">
+             配置参数
             </v-card-title>
             <v-btn @click="getParentParams">获取父节点参数</v-btn>
             <v-form
               ref="form"
               lazy-validation
+              class="mx-3"
             >
-            <div v-for="(config,key) in node.parameters" :key="key">
+            <div v-for="(config,key) in node.train_params" :key="key">
               <v-text-field
                 v-if="key.indexOf('_file')==-1 && !(key=='additional_run_kwargs')"  
                 :label="key"
-                v-model="node.parameters[key]"
+                v-model="node.train_params[key]"
                 required
                 outlined
                 height="10px"
@@ -44,17 +46,51 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="primary" @click="completeFill" >完成</v-btn>
-              <v-btn color="secondary" @click="connectToDatabase" :loading="dataBaseFetching" :disabled="!node.submit_result">计算数据</v-btn>
+              <v-btn color="secondary" @click="connectToDatabase" :loading="dataBaseFetching" :disabled="!nodeParams.submit_result">计算数据</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
         <!-- 展示详情 -->
-        <v-dialog v-model="showDetialMess" max-width="300">
-          <v-card class=" pa-5">
-            {{node.message}}
+        <v-dialog v-model="showDetialMess" max-width="600" >
+          <v-card min-height="600">
+            <v-card-title class="text-h6 grey lighten-2">
+            查看输出
+            </v-card-title>
+            <v-list dense>
+              <v-list-item
+                v-for="(item,index) in node"
+                :key="index"
+              >
+                  <template v-if="typeof item == 'object'">
+                   <v-expansion-panels :accordion="true" >
+                    <v-expansion-panel>
+                      <v-expansion-panel-header color="#daeaf6">
+                        {{index}}
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content>
+                        <v-list>
+                          <v-list-item v-for="(v,index) in item" :key="index">
+                            <v-list-item-content>{{index}}:</v-list-item-content>
+                            <v-list-item-content>{{v}}</v-list-item-content>
+                          </v-list-item>
+                        </v-list>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                    </v-expansion-panels>
+                  </template>
+                  <template v-else>
+                    <v-list-item-icon>
+                      {{index}}:
+                    </v-list-item-icon>
+                    <v-list-item-content>
+                      <v-list-item-title>{{ item }}</v-list-item-title>
+                    </v-list-item-content>
+                  </template>
+              </v-list-item>
+            </v-list>
           </v-card>
         </v-dialog>
-        <v-tooltip top color="warning" :activator="getNode()" v-if="node.disabled">
+        <v-tooltip top color="warning" :activator="getNode()" v-if="nodeParams.disabled">
           <v-icon color="white" size="18px">mdi-alert-circle</v-icon><span>请先配置参数</span>
         </v-tooltip>
   </div>
@@ -75,13 +111,16 @@ export default {
     flowNodeContainer: {
       get() {
         return {
-          top: this.node.top,
-          left: this.node.left
+          top: this.node.node_params.top,
+          left: this.node.node_params.left
         };
       }
     },
     ifShownodeAnchor(){
-      return this.mouseEnter && !this.node.disabled && !this.node.last;
+      return this.mouseEnter && !this.node.node_params.disabled && !this.node.node_params.last;
+    },
+    nodeParams(){
+      return this.node.node_params
     }
     
   },
@@ -131,7 +170,6 @@ export default {
           disabled: false,
           icon: "",
           onClick: () => {
-            console.log(this.$vuetify);
             this.showDetialMess = true;
           }
         },
@@ -162,7 +200,7 @@ export default {
       this.isActive = true
       this.isSelected = false
       setTimeout(() => {
-        this.$emit("changeLineState", this.node.node_id, true)
+        this.$emit("changeLineState", this.nodeParams.node_id, true)
       },0)
     },
     setNotActive() {
@@ -172,7 +210,7 @@ export default {
       if(!this.isActive) {
         return
       }
-      this.$emit("changeLineState", this.node.node_id, false)
+      this.$emit("changeLineState", this.nodeParams.node_id, false)
       this.isActive = false
     },
     editNode() {
@@ -192,7 +230,7 @@ export default {
           })
         },
         onOk: () => {
-          this.$emit('setNodeName', this.node.node_id, this.newNodeName)
+          this.$emit('setNodeName', this.nodeParams.node_id, this.newNodeName)
         }
       })
     },
@@ -245,12 +283,12 @@ export default {
       if (res.node_exec_state.state == 'success') {
         this.$emit("ctlRightOverLay",this.node,this.isActive)
         this.$nextTick(()=>{
-          this.$parent.jsPlumb.makeTarget(this.node.node_id, this.$parent.jsplumbTargetOptions);
+          this.$parent.jsPlumb.makeTarget(this.nodeParams.node_id, this.$parent.jsplumbTargetOptions);
         })
         this.$message.alertMessage('操作成功！')
         this.dataBaseFetching = false;
         this.formInfoShow = false;
-        delete this.node.disabled
+        delete this.nodeParams.disabled
         //重新刷新列表数据
         
       }else{
@@ -269,20 +307,20 @@ export default {
       this.formInfoShow = false;
     },
     getNode(){
-      return document.getElementById(this.node.node_id);
+      return document.getElementById(this.nodeParams.node_id);
     },
     globalMessage(val){
       this.$parent.alertMessage(val);
     },
     getParentParams(){
-      this.$emit('getParentParams',this.node.node_id)
+      this.$emit('getParentParams',this.nodeParams.node_id)
     }
   },
   mounted(){
   },
   created(){
-    if (this.node.submit) {
-      this.node.disabled = true;
+    if (this.nodeParams.submit && !this.node.node_result) {
+      this.nodeParams.disabled = true;
     }
   }
 };

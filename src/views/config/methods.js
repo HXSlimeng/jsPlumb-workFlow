@@ -36,11 +36,11 @@ const methods = {
     for (let i = 0; i < this.data.nodeList.length; i++) {
       let node = this.data.nodeList[i];
       // 设置源点，可以拖出线连接其他节点
-      this.jsPlumb.makeSource(node.node_id, this.jsplumbSourceOptions);
+      this.jsPlumb.makeSource(node.node_params.node_id, this.jsplumbSourceOptions);
       // // 设置目标点，其他源点拖出的线可以连接该节点
-      this.jsPlumb.makeTarget(node.node_id, this.jsplumbTargetOptions);
-      // this.jsPlumb.draggable(node.node_id);
-      this.draggableNode(node.node_id)
+      this.jsPlumb.makeTarget(node.node_params.node_id, this.jsplumbTargetOptions);
+      // this.jsPlumb.draggable(node.node_params.node_id);
+      this.draggableNode(node.node_params.node_id)
     }
 
     // 初始化连线
@@ -87,11 +87,11 @@ const methods = {
   alignForLine(nodeId, position) {
     let showXLine = false, showYLine = false
     this.data.nodeList.some(el => {
-      if(el.node_id !== nodeId && el.left == position[0]+'px') {
+      if(el.node_params.node_id !== nodeId && el.node_params.left == position[0]+'px') {
         this.auxiliaryLinePos.x = position[0] + 60;
         showYLine = true
       }
-      if(el.node_id !== nodeId && el.top == position[1]+'px') {
+      if(el.node_params.node_id !== nodeId && el.node_params.top == position[1]+'px') {
         this.auxiliaryLinePos.y = position[1] + 20;
         showXLine = true
       }
@@ -101,9 +101,9 @@ const methods = {
   },
   changeNodePosition(nodeId, pos) {
     this.data.nodeList.some(v => {
-      if(nodeId == v.node_id) {
-        v.left = pos[0] +'px'
-        v.top = pos[1] + 'px'
+      if(nodeId == v.node_params.node_id) {
+        v.node_params.left = pos[0] +'px'
+        v.node_params.top = pos[1] + 'px'
         return true
       }else {
         return false
@@ -118,17 +118,15 @@ const methods = {
     const scale = this.getScale();
     let left = (event.pageX - containerRect.left -60) / scale;
     let top = (event.pageY - containerRect.top -20) / scale;
-    console.log(this.currentItem);
       var temp = {
         /* dataBase:this.currentItem.title + res, */
         ...this.currentItem,
-        node_id: GenNonDuplicateID(8),
-        top: (Math.round(top/20))*20 + "px",
-        left:  (Math.round(left/20))*20 + "px",
       };
+      temp.node_params.node_id = GenNonDuplicateID(8),
+      temp.node_params.top = (Math.round(top/20))*20 + "px",
+      temp.node_params.left = (Math.round(left/20))*20 + "px",
       
       this.addNode(temp);
-    
   },
   addLine(line) {
     let from = line.source.id;
@@ -179,9 +177,9 @@ const methods = {
   addNode(temp) {
     this.data.nodeList.push(temp);
     this.$nextTick(() => {
-      temp.disabled ? '' : this.jsPlumb.makeTarget(temp.node_id, this.jsplumbTargetOptions);
-      temp.last ? '' : this.jsPlumb.makeSource(temp.node_id, this.jsplumbSourceOptions);
-      this.draggableNode(temp.node_id)
+      temp.node_params.disabled ? '' : this.jsPlumb.makeTarget(temp.node_params.node_id, this.jsplumbTargetOptions);
+      temp.node_params.last ? '' : this.jsPlumb.makeSource(temp.node_params.node_id, this.jsplumbSourceOptions);
+      this.draggableNode(temp.node_params.node_id)
     });
   },
 
@@ -241,7 +239,7 @@ const methods = {
 
   setNodeName(nodeId, name) {
     this.data.nodeList.some((v) => {
-      if(v.node_id === nodeId) {
+      if(v.node_params.node_id === nodeId) {
         v.nodeName = name
         return true
       }else {
@@ -253,18 +251,21 @@ const methods = {
   //删除节点
   deleteNode(node) {
     this.data.nodeList.some((v,index) => {
-      if(v.node_id === node.node_id) {
-        this.data.nodeList.splice(index, 1)
-        this.jsPlumb.remove(v.node_id)
+      if(v.node_params.node_id == node.node_params.node_id) {
+        let delNodeId = v.node_params.node_id;
+        
+        this.jsPlumb.remove(delNodeId)
+          this.data.nodeList.splice(index, 1)
+
         //删除节点时同步删除右边信息栏
-        if (v.node_id == this.rightOverlay.info.node_id) {
+        if (v.node_params.node_id == this.rightOverlay.info.node_params.node_id) {
           this.rightOverlay.active = false;
         }
         return true
       }else {
         return false
       }
-    })
+    });
   },
 
   //更改连线状态
@@ -298,8 +299,8 @@ const methods = {
       let fixTop = 0, fixLeft = 0;
       this.data.nodeList.forEach(el => {
         //将json中的单位'px'去除
-        let top = Number(el.top.substring(0, el.top.length -2))
-        let left = Number(el.left.substring(0, el.left.length -2))
+        let top = Number(el.node_params.top.substring(0, el.node_params.top.length -2))
+        let left = Number(el.node_params.left.substring(0, el.node_params.left.length -2))
         maxLeft = left > maxLeft ? left : maxLeft
         minLeft = left < minLeft ? left : minLeft
         maxTop = top > maxTop ? top : maxTop
@@ -314,10 +315,10 @@ const methods = {
       fixLeft = nodePoint.left !== nodePoint.right ? (nodePoint.right - nodePoint.left) / 2 : 0;
 
       this.data.nodeList.map(el => {
-        let top = Number(el.top.substring(0, el.top.length - 2)) + fixTop;
-        let left = Number(el.left.substring(0, el.left.length - 2)) + fixLeft;
-        el.top = (Math.round(top/20))* 20 + 'px'
-        el.left = (Math.round(left/20))*20 + 'px'
+        let top = Number(el.node_params.top.substring(0, el.node_params.top.length - 2)) + fixTop;
+        let left = Number(el.node_params.left.substring(0, el.node_params.left.length - 2)) + fixLeft;
+        el.node_params.top = (Math.round(top/20))* 20 + 'px'
+        el.node_params.left = (Math.round(left/20))*20 + 'px'
       })
     }
   }, 
@@ -331,7 +332,6 @@ const methods = {
       setTimeout(()=>{
         this.rightOverlay.info = val;
         this.rightOverlay.active = true;
-
       },200)
     }
   },
