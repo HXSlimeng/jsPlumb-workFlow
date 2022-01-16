@@ -135,6 +135,7 @@
               >
                 <v-tab>基本数据</v-tab>
                 <v-tab>图表</v-tab>
+                <v-tab>3d图表</v-tab>
               </v-tabs>
         <v-tabs-items v-model="rightOverlayTabs">
           <v-tab-item>
@@ -181,6 +182,12 @@
               <div id="basicBar"></div>
             </v-card>
           </v-tab-item>
+          <v-tab-item>
+            <v-card height="600px" class="mx-2 my-2">
+              <v-card-title class="my-0 text-h5">数据分析3d折线图</v-card-title>
+              <div id="scatter3D" ></div>
+            </v-card>
+          </v-tab-item>
         </v-tabs-items>
        </v-navigation-drawer>
     </div>
@@ -198,6 +205,7 @@ import { jsplumbSetting, jsplumbConnectOptions, jsplumbSourceOptions, jsplumbTar
 import methods from "./config/methods"
 import jsonData from './config/data copy.json'
 import flowNode from "./components/node-item"
+import json3d from "./config/json3d.json"
 export default {
   name: "FlowEdit",
   components: {
@@ -405,6 +413,34 @@ export default {
               }
             }
           ]
+        },
+        scatter3Dopt:{
+          grid3D: {},
+          xAxis3D: {
+            type: 'category'
+          },
+          yAxis3D: {},
+          zAxis3D: {},
+          dataset: {
+            dimensions: [
+              'X轴',
+              'Y轴',
+              'Z轴',
+            ],
+            source:json3d.node_result.Y
+          },
+          series: [
+            {
+              type: 'scatter3D',
+              symbolSize: 3.5,
+              encode: {
+                x: 0,
+                y: 1,
+                z: 2,
+                tooltip: 'tooltip文字'
+              }
+            }
+          ]
         }
       }
     };
@@ -415,6 +451,7 @@ export default {
     if (modelInfo) {
       this.reloadData(modelInfo);
     }
+    console.log(json3d);
 
   },
   mounted() {
@@ -481,10 +518,13 @@ export default {
         setTimeout(() => {
           let pie = document.getElementById('pieChart')
           let basicBar = document.getElementById('basicBar')
+          let scatter3D = document.getElementById('scatter3D')
           let pieChart = this.$echarts.init(pie);
           let barChart = this.$echarts.init(basicBar);
+          let scatter3DChart = this.$echarts.init(scatter3D);
           pieChart.setOption(this.chartsOpt.pieOption);
           barChart.setOption(this.chartsOpt.basicBarOpt);
+          scatter3DChart.setOption(this.chartsOpt.scatter3Dopt);
         }, 0);
       }
     },
@@ -615,6 +655,9 @@ export default {
   margin: 0 auto;
 }
 #basicBar{
+  #pieChart()
+}
+#scatter3D{
   #pieChart()
 }
 .tabsCtl{

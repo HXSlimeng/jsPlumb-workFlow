@@ -44,7 +44,8 @@ const methods = {
     }
 
     // 初始化连线
-    this.jsPlumb.unbind("connection"); //取消连接事件
+    // 取消连接事件
+    this.jsPlumb.unbind("connection"); 
     for (let i = 0; i < this.data.lineList.length; i++) {
       let line = this.data.lineList[i];
       this.jsPlumb.connect(
@@ -55,6 +56,7 @@ const methods = {
         this.jsplumbConnectOptions
       );
     }
+    //连接线连接事件
     this.jsPlumb.bind("connection", evt => {
       let from = evt.source.id;
       let to = evt.target.id;
@@ -137,7 +139,6 @@ const methods = {
       this.addNode(temp);
   },
   addLine(line) {
-    console.log(line);
     let from = line.source.id;
     let to = line.target.id;
     

@@ -9,7 +9,10 @@ import common from '@/views/components/common/index.js'
 
 //echarts
 import * as echarts from 'echarts/core';
-import { PieChart,BarChart   } from 'echarts/charts';
+import 'echarts-gl';
+import { PieChart,BarChart,Scatter3D   } from 'echarts/charts';
+import { Scatter3DChart } from 'echarts-gl/charts';
+import { Grid3DComponent } from 'echarts-gl/components';
 import {
   TitleComponent,
   TooltipComponent,
@@ -34,6 +37,8 @@ echarts.use([
   LegendComponent,
   PieChart ,
   BarChart,
+  Scatter3DChart,
+  Grid3DComponent,
   LabelLayout,
   UniversalTransition,
   CanvasRenderer
