@@ -1,6 +1,5 @@
 <template>
   <div>
-    
       <v-dialog v-model="showDelDialog">
         <v-card>
         <v-card-text>
@@ -21,7 +20,16 @@
         </v-card-actions>
       </v-card>
       </v-dialog>
-
+    <v-card class="editToolbar d-flex align-center justify-end"  elevation="">
+          <v-card-title class="text-h5 pl-6" style="position:absolute; left:0">模型编辑</v-card-title>
+          <div class="mainCtrl mr-10">
+            <v-btn class="mx-3" @click="goSaveGraph"><v-icon dark color="blue" class="">mdi-download-box</v-icon>保存</v-btn>
+            <v-btn class="mx-3" @click="runAllGraph"><v-icon dark color="blue" class="" >mdi-play-box</v-icon>执行</v-btn>
+            <v-btn class="ml-10 teal darken-1" @click="backToEdit" dark>返回模型管理</v-btn>
+          </div>
+          <div>
+            </div>
+        </v-card>
     <div class="flow_region">
       <div >
         <!-- <div v-for="item in nodeTypeList" :key="item.type" class="node" draggable="true" @dragstart="drag($event, item)">
@@ -36,7 +44,6 @@
             :hide-overlay="true"
             :stateless="true"
           >
-          
             <v-list nav dense >
               <v-list-group
                 v-for="item in listItem"
@@ -45,7 +52,7 @@
                 no-action
               >
               <template #prependIcon>
-                <v-icon color="#f5c16c">{{item.active ? 'mdi-folder-open' : 'mdi-folder'}}</v-icon>
+                <v-icon color="#0D47A1">{{item.active ? 'mdi-database-settings' : 'mdi-database'}}</v-icon>
               </template>
               <template #activator>
                 <v-list-item-content>
@@ -58,34 +65,28 @@
                   :key="child.node_params.node_type"
                   draggable="true"
                   @dragstart="drag($event, child)"
+                  class="leftDragItem"
                 >
 
-                    <v-icon color="#f5c16c">mdi-folder</v-icon>
-                  <v-list-item-content>
-                    <v-list-item-title v-text="child.node_params.node_type"></v-list-item-title>
+                    <v-icon color="#0D47A1">mdi-database</v-icon>
+                  <v-list-item-content >
+                    <v-list-item-title>{{getNameByNodeType(child.node_params.node_type)}}
+                      <v-icon class="float-right">mdi-plus</v-icon>
+                    </v-list-item-title>
+                    
                   </v-list-item-content>
                 </v-list-item>
               </v-list-group>
             </v-list>
        </v-navigation-drawer>
-
       </div>
       <div id="flowWrap" ref="flowWrap" class="flow-wrap" @drop="drop($event)" @dragover="allowDrop($event)">
-        <v-card class="editToolbar d-flex align-center justify-end"  elevation="1">
-          <v-card-title class="text-h5 mx-3" style="position:absolute; left:0">模型编辑</v-card-title>
-          <div class="mainCtrl mr-10">
-            <v-btn class="mx-3" @click="flowToJSON"><v-icon dark color="blue" class="">mdi-download-box</v-icon>保存</v-btn>
-            <v-btn class="mx-3"><v-icon dark color="blue" class="">mdi-play-box</v-icon>执行</v-btn>
-            <v-btn class="ml-10" @click="backToEdit">返回模型管理</v-btn>
-          </div>
-          <div>
-            </div>
-        </v-card>
+        <v-subheader class="text-h5" style="color:#00695C">{{data.graph_param.graph_name}}</v-subheader>
         <div id="flow">
           <div v-show="auxiliaryLine.isShowXLine" class="auxiliary-line-x" :style="{width: auxiliaryLinePos.width, top:auxiliaryLinePos.y + 'px', left: auxiliaryLinePos.offsetX + 'px'}"></div>
           <div v-show="auxiliaryLine.isShowYLine" class="auxiliary-line-y" :style="{height: auxiliaryLinePos.height, left:auxiliaryLinePos.x + 'px', top: auxiliaryLinePos.offsetY + 'px'}"></div>
           
-          <flowNode v-for="item in data.nodeList" :id="item.node_params.node_id" :key="item.node_params.node_id" :node="item" @setNodeName="setNodeName" @deleteNode = "deleteNode" @changeLineState="changeLineState" @ctlRightOverLay="ctlRightOverLay" @getParentParams="getParentParams">
+          <flowNode ref="nodeItems" v-for="item in data.nodeList" :id="item.node_params.node_id" :key="item.node_params.node_id" :node="item" @setNodeName="setNodeName" @deleteNode = "deleteNode" @changeLineState="changeLineState" @ctlRightOverLay="ctlRightOverLay" @getParentParams="getParentParams">
 
           </flowNode>
         
@@ -101,7 +102,6 @@
             width="600"
             :expand-on-hover="false"
             height="94%"
-            class="pt-10"
           >
           <template v-slot:prepend>
             <v-list-item two-line>
@@ -109,8 +109,8 @@
                 <v-icon>mdi-pencil</v-icon>
               </v-list-item-avatar>
               <v-list-item-content>
-                <v-list-item-title class="text-h4">{{rightOverlay.info.node_params.node_type}}</v-list-item-title>
-                <v-list-item-subtitle>副标题</v-list-item-subtitle>
+                <v-list-item-title class="text-h4">{{getNameByNodeType(rightOverlay.info.node_params.node_type)}}</v-list-item-title>
+                <!-- <v-list-item-subtitle>副标题</v-list-item-subtitle> -->
               </v-list-item-content>
               <div class="d-flex justify-center align-center" >
                   <v-btn
@@ -134,12 +134,74 @@
                 class="tabsCtl"
               >
                 <v-tab>基本数据</v-tab>
+                <v-tab>执行结果</v-tab>
                 <v-tab>图表</v-tab>
                 <v-tab>3d图表</v-tab>
               </v-tabs>
         <v-tabs-items v-model="rightOverlayTabs">
           <v-tab-item>
-            <v-list dense>
+            <v-card class="ma-2 pa-2">
+                    <v-text-field  v-model="rightOverlay.info.node_params.node_name" solo dense ><template #prepend><div class="text-h6 rOverlayTit">节点名称:</div></template></v-text-field>
+                    <v-text-field  v-model="rightOverlay.info.node_params.message" disabled solo dense ><template #prepend><div class="text-h6 rOverlayTit">帮助信息:</div></template></v-text-field>
+                    <v-switch v-model="rightOverlay.info.train_params.submit_result" label="节点是否返回节点计算结果"></v-switch>
+                    <v-text-field v-if="rightOverlay.info.node_result" v-model="rightOverlay.info.node_result.addtional_node_info" disabled solo dense ><template #prepend><div class="text-h6 rOverlayTit">计算结果:</div></template></v-text-field>
+                    <v-expansion-panels :accordion="true" >
+                    <v-expansion-panel>
+                      <v-expansion-panel-header color="#daeaf6">
+                      train_params
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content>
+                        <v-list>
+                          <v-list-item v-for="(v,index) in rightOverlay.info.train_params" :key="index">
+                            <v-list-item-content>{{index}}:</v-list-item-content>
+                            <v-list-item-content>{{v}}</v-list-item-content>
+                          </v-list-item>
+                        </v-list>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                    <v-expansion-panel>
+                      <v-expansion-panel-header color="#daeaf6">
+                      op_params
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content>
+                        <v-list>
+                          <v-list-item v-for="(v,index) in rightOverlay.info.op_params" :key="index">
+                            <v-list-item-content>{{index}}:</v-list-item-content>
+                            <v-list-item-content>{{v}}</v-list-item-content>
+                          </v-list-item>
+                        </v-list>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                    <v-expansion-panel>
+                      <v-expansion-panel-header color="#daeaf6">
+                      resource_params
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content>
+                        <v-list>
+                          <v-list-item v-for="(v,index) in rightOverlay.info.resource_params" :key="index">
+                            <v-list-item-content>{{index}}:</v-list-item-content>
+                            <v-list-item-content>{{v}}</v-list-item-content>
+                          </v-list-item>
+                        </v-list>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                    <v-expansion-panel >
+                      <v-expansion-panel-header color="#daeaf6">
+                      addtional_node_info
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content >
+                        <v-list v-if="rightOverlay.info.node_result">
+                          <v-list-item v-for="(v,index) in rightOverlay.info.node_result.addtional_node_info" :key="index">
+                            <v-list-item-content>{{index}}:</v-list-item-content>
+                            <v-list-item-content>{{v}}</v-list-item-content>
+                          </v-list-item>
+                        </v-list>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                    </v-expansion-panels>
+            </v-card>
+            
+            <v-list dense v-if="false">
               <v-list-item
                 v-for="(item,index) in rightOverlay.info"
                 :key="index"
@@ -172,7 +234,35 @@
               </v-list-item>
             </v-list>
           </v-tab-item>
-          <v-tab-item v-if="rightOverlay.info">
+          <v-tab-item>
+            <v-card class="mx-2 my-2">
+              <v-card-title class="my-0 text-h5">执行结果</v-card-title>
+              <v-data-table
+                :headers="headers"
+                :items="rightOverlay.info.node_result ? rightOverlay.info.node_result.X : []"
+                :items-per-page="10"
+                class="elevation-1"
+              >
+              <template #[`item.one`]="{ item }">
+                {{item[0]}}
+              </template>
+              <template #[`item.two`]="{ item }">
+                {{item[1]}}
+              </template>
+              <template #[`item.three`]="{ item }">
+                {{item[2]}}
+              </template>
+              <template #[`item.four`]="{ item }">
+                {{item[3]}}
+              </template>
+              <template #[`item.five`]="{ item }">
+                {{item[4]}}
+              </template>
+              </v-data-table>
+          </v-card>
+          </v-tab-item>
+          <v-tab-item>
+            
             <v-card height="400px" class="mx-2 my-2">
               <v-card-title class="my-0 text-h5">数据分析饼图</v-card-title>
               <div id="pieChart" ></div>
@@ -183,8 +273,8 @@
             </v-card>
           </v-tab-item>
           <v-tab-item>
-            <v-card height="600px" class="mx-2 my-2">
-              <v-card-title class="my-0 text-h5">数据分析3d折线图</v-card-title>
+            <v-card  class="mx-2 my-2">
+              <v-card-title class="my-0 text-h5">数据分析3d散点图</v-card-title>
               <div id="scatter3D" ></div>
             </v-card>
           </v-tab-item>
@@ -206,6 +296,10 @@ import methods from "./config/methods"
 import jsonData from './config/data copy.json'
 import flowNode from "./components/node-item"
 import json3d from "./config/json3d.json"
+import leftListItem from "./config/leftListItem.json"
+import { saveGraph,runGraph } from "@/request/apis/drawApi.js";
+
+
 export default {
   name: "FlowEdit",
   components: {
@@ -243,118 +337,31 @@ export default {
         height: 0,
         width: 0
       },
-      listItem: [
-        {
-          action: 'mdi-ticket',
-          items: [],
-          node_type: '数据载入类',
-        },
-        {
-          action: 'mdi-silverware-fork-knife',
-          items: [
-            { 
-              node_params:{
-                node_type: "根节点",
-                message: "这是详情信息",
-                node_name: "nodeName",
-                submit: false,
-                submit_result: false,
-                last: true,
-              },
-              resource_params:[], 
-              op_params: {}, 
-              train_params: {
-                  xls_file: "./client_demo/data/iris.xlsx", 
-                  sheet:"", 
-                  min_row:"", 
-                  min_col:"", 
-                  max_row:"", 
-                  max_col:"" ,
-                  additional_run_kwargs: {
-                    submit_result: false 
-                  },
-                  predict_params: {},
-              },
-              
-            },
-            { 
-              node_params:{
-                node_type: "数据源",
-                message: "这是详情信息",
-                node_name: "nodeName",
-                submit: true,
-                submit_result: true,
-                last: false,
-              },
-              resource_params:[], 
-              op_params: {}, 
-              train_params: {
-                  xls_file: "./client_demo/data/iris.xlsx", 
-                  sheet:"", 
-                  min_row:"", 
-                  min_col:"", 
-                  max_row:"", 
-                  max_col:"" ,
-                  additional_run_kwargs: {
-                    submit_result: false 
-                  },
-                  predict_params: {},
-              },
-              
-            },
-            { 
-              node_params:{
-                node_type: "普通数据",
-                message: "这是详情信息",
-                node_name: "nodeName",
-                submit: false,
-                submit_result: false,
-                last: false,
-              },
-              resource_params:[], 
-              op_params: {}, 
-              train_params: {
-                  xls_file: "./client_demo/data/iris.xlsx", 
-                  sheet:"", 
-                  min_row:"", 
-                  min_col:"", 
-                  max_row:"", 
-                  max_col:"" ,
-                  additional_run_kwargs: {
-                    submit_result: false 
-                  },
-                  predict_params: {},
-              },
-            },
-          ],
-          node_type: '数据预处理',
-        },
-        {
-          action: 'mdi-school',
-          items: [],
-          node_type: '机器学习算法',
-        },
-        {
-          action: 'mdi-run',
-          items: [],
-          node_type: '统计学习类算法',
-        },
-        {
-          action: 'mdi-content-cut',
-          items: [],
-          node_type: '办公室',
-        },
-        {
-          action: 'mdi-tag',
-          items: [],
-          node_type: '促销活动',
-        },
+      listItem:leftListItem.listitems,
+      listTypeMap:[
+        ['fitow_csv_loader','CSV文件读取'],
+        ['fitow_xlsx_loader','EXCEL文件读取'],
+        ['fitow_standard_scaler','01标准化'],
+        ['fitow_min_max_scaler','极值标准化'],
+        ['fitow_data_slicer','数据切片'],
+        ['fitow_linear_regression','线性回归算法'],
+        ['fitow_kmeans','Kmeans聚类'],
+        ['fitow_pca','PCA降维'],
+        ['fitow_tsne','TSNE降维'],
+        ['fitow_svm_regression','SVM回归'],
+        ['fitow_status_describe', '描述性统计分析']
       ],
+      listMap:{},
       leftBarVis:true,
       showDelDialog:false,
       rightOverlay:{
         info:{
-          node_params:{}
+          node_params:{},
+          train_params:{},
+          node_result:{
+            X:null,
+            Y:null
+          },
         },
         active:false
       },
@@ -419,39 +426,87 @@ export default {
           xAxis3D: {
             type: 'category'
           },
-          yAxis3D: {},
-          zAxis3D: {},
+          yAxis3D: {
+            name:'Y轴文字',
+            itemStyle: {
+              borderColor: "#DC143C",
+              backgroundColor: "#DC143C"
+            },
+          },
+          zAxis3D: {
+            itemStyle: {
+              borderColor: "#DC143C",
+              backgroundColor: "#DC143C"
+            },
+          },
+           visualMap: {
+              calculable: true,
+              max: 3,
+              // 维度的名字默认就是表头的属性名
+              dimension: 1,
+              inRange: {
+                  color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+              }
+          },
           dataset: {
             dimensions: [
               'X轴',
               'Y轴',
               'Z轴',
             ],
-            source:json3d.node_result.Y
+            source:json3d.node_result.X
           },
           series: [
             {
               type: 'scatter3D',
               symbolSize: 3.5,
+              //数据点的大小
               encode: {
                 x: 0,
                 y: 1,
                 z: 2,
-                tooltip: 'tooltip文字'
-              }
+                tooltip: {
+                  backgroundColor:'rgba(250,50,50,0.7)',
+                  trigger:'item'
+                }
+              },
+              itemStyle: {
+                    // borderWidth: 1,
+                    // borderColor: 'rgba(255,255,255,0.8)'//边框样式
+                },
             }
           ]
         }
-      }
+      },
+      chartInit:{
+        scatter3DChart:false,
+        pieChart:false,
+        barChart:false
+      },
+      headers:[
+        {
+            text: '第一项',
+            align: 'start',
+            sortable: false,
+            value: 'one',
+          },
+          { text: '第二项', value: 'two' },
+          { text: '第三项', value: 'three' },
+          { text: '第四项', value: 'four' },
+          { text: '第五项', value: 'five' },
+      ],
+      testObj:{}
     };
   },
   created(){
+
+    this.listMap = new Map(this.listTypeMap);
+    
     this.jsPlumb = jsPlumb.getInstance();
     let modelInfo = this.$route.params.modelInfo;
     if (modelInfo) {
       this.reloadData(modelInfo);
     }
-    console.log(json3d);
 
   },
   mounted() {
@@ -486,6 +541,16 @@ export default {
       let body =  JSON.stringify(this.data);
       console.log(body);
     },
+    goSaveGraph(){
+      saveGraph(this.data)
+      .then(res=>{
+        if (res.save_state == "success") {
+          this.$message.alertMessage('保存成功!')
+        }
+      }).catch(err=>{
+        console.log(err);
+      })
+    },
     reloadData(innerData){
       if(!innerData){
         innerData = jsonData;
@@ -514,17 +579,20 @@ export default {
         }
     },
     rightOverylayTabsChange(val){
-      if (val == 1) {
+      if (val == 2 && !this.chartInit.barChart && !this.chartInit.pieChart) {
         setTimeout(() => {
           let pie = document.getElementById('pieChart')
           let basicBar = document.getElementById('basicBar')
+          this.chartInit.pieChart = this.$echarts.init(pie);
+          this.chartInit.barChart = this.$echarts.init(basicBar);
+          this.chartInit.pieChart.setOption(this.chartsOpt.pieOption);
+          this.chartInit.barChart.setOption(this.chartsOpt.basicBarOpt);
+        }, 0);
+      }else if(val == 3 && !this.chartInit.scatter3DChart){
+        setTimeout(() => {
           let scatter3D = document.getElementById('scatter3D')
-          let pieChart = this.$echarts.init(pie);
-          let barChart = this.$echarts.init(basicBar);
-          let scatter3DChart = this.$echarts.init(scatter3D);
-          pieChart.setOption(this.chartsOpt.pieOption);
-          barChart.setOption(this.chartsOpt.basicBarOpt);
-          scatter3DChart.setOption(this.chartsOpt.scatter3Dopt);
+          this.chartInit.scatter3DChart = this.$echarts.init(scatter3D);
+          this.chartInit.scatter3DChart.setOption(this.chartsOpt.scatter3Dopt);
         }, 0);
       }
     },
@@ -541,13 +609,39 @@ export default {
           parentCollect.push(v);
         }
       })
-      console.log(parentCollect);
       return parentCollect;
     },
     backToEdit(){
       this.$router.push({path:'/'})
+    },
+    runAllGraph(){
+      runGraph(this.data).then(res=>{
+        if (res.success == "OK") {
+          this.$message.alertMessage('执行成功!')
+        }else{
+          console.log(res);
+        }
+      }).catch(err=>{
+        console.log(err);
+      })
+      let nodeItems = this.$refs.nodeItems;
+      if (nodeItems) {
+        setTimeout(() => {
+          nodeItems.forEach(v=>{
+            v.connectToDatabase()
+            // v.getParentParams(v.node.node_params.node_id);
+            })
+        }, 3000);
+      }else{
+        this.$message.alertMessage('当前没有可执行的结点');
+      }
+    },
+    getNameByNodeType(type){
+      return this.listMap.get(type);
     }
-
+  },
+  computed:{
+    
   }
 };
 </script>
@@ -559,6 +653,15 @@ export default {
   right: 20px;
   width: 400px;
 }
+.editToolbar{
+      height: 50px;
+      z-index: 2;
+      .mainCtrl{
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+    }
 .flow_region {
   display: flex;
   width: 100%;
@@ -592,6 +695,7 @@ export default {
       }
     }
   }
+  
   .flow-wrap {
     height: 100%;
     position: relative;
@@ -600,15 +704,8 @@ export default {
     flex-grow: 1;
     // background-image: url("../assets/point.png");
     background: #daeaf6;
-    .editToolbar{
-      height: 50px;
-      z-index: 2;
-    }
-    .mainCtrl{
-      height: 100%;
-      display: flex;
-      align-items: center;
-    }
+    
+    
     #flow {
       position: relative;
       width: 100%;
@@ -658,11 +755,25 @@ export default {
   #pieChart()
 }
 #scatter3D{
-  #pieChart()
+  height: 400px;
+  width: 400px;
+  margin: 0 auto;
 }
 .tabsCtl{
   position: sticky;
   top: 0;
   z-index: 2;
+}
+.rOverlayTit{
+  margin-right: 20px;
+  white-space: nowrap;
+}
+.leftDragItem{
+  border: dashed 1px black;
+  padding-left: 0px !important;
+  margin-left: 64px;
+}
+.v-list-item__title{
+  line-height: 24px !important;
 }
 </style>

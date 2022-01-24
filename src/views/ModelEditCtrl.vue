@@ -1,10 +1,10 @@
 <template>
   <div class="d-flex flex-column justify-center align-center" >
-      <v-card class="text-h5 d-flex justify-space-between align-center pl-6 " height="50" style="width:100%">
+      <v-card class="text-h5 d-flex justify-space-between align-center pl-6 "  height="50" style="width:100%">
         模型管理
         <v-dialog v-model="addModel" width="500">
             <template #activator="{ on, attrs }">
-            <v-btn color="red lighten-2"
+            <v-btn color="teal darken-1"
                     dark
                     class="mr-16"
                     v-bind="attrs"
@@ -51,62 +51,63 @@
             :items="desserts"
             :single-select="singleSelect"
             disable-sort
-            item-key="graph_param.graph_id"
-            hide-default-footer
+            item-key="model_id"
             :page.sync="page"
             show-select
             class="elevation-1"
+            :loading="dataLifetching"
+            loading-text="数据加载中"
         >
             <template v-slot:top>
-                <v-btn color="red" dark class="mx-10 align-self-start mt-2" @click="batchDelete">批量删除</v-btn>
+                <v-btn color="red" class="mx-10 align-self-start mt-2" :disabled="desserts == false" @click="batchDelete">批量删除</v-btn>
                 <v-dialog
-            v-model="editDialog"
-            max-width="500px"
-            >
-            <v-card>
-                <v-card-title>
-                <span class="text-h5">编辑模型</span>
-                </v-card-title>
+                    v-model="editDialog"
+                    max-width="500px"
+                    >
+                    <v-card>
+                        <v-card-title>
+                        <span class="text-h5">编辑模型</span>
+                        </v-card-title>
 
-                <v-card-text>
-                <v-container>
-                    <v-row>
-                    <v-col>
-                        <v-text-field
-                        v-model="editedItem.graph_param.graph_name"
-                        label="模型名称"
-                        ></v-text-field>
-                    </v-col>
-                    </v-row>
-                    <v-row>
-                    <v-col>
-                        <v-text-field
-                        v-model="editedItem.graph_param.graph_message"
-                        label="描述"
-                        ></v-text-field>
-                    </v-col>
-                    </v-row>
-                </v-container>
-                </v-card-text>
+                        <v-card-text>
+                        <v-container>
+                            <v-row>
+                            <v-col>
+                                <v-text-field
+                                v-model="editedItem.model_name"
+                                label="模型名称"
+                                ></v-text-field>
+                            </v-col>
+                            </v-row>
+                            <v-row>
+                            <v-col>
+                                <v-text-field
+                                v-model="editedItem.model_id"
+                                label="描述"
+                                ></v-text-field>
+                            </v-col>
+                            </v-row>
+                        </v-container>
+                        </v-card-text>
 
-                <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                    color="blue darken-1"
-                    text
-                    @click="close"
-                >
-                    取消
-                </v-btn>
-                <v-btn
-                    color="blue darken-1"
-                    text
-                    @click="save"
-                >
-                    保存
-                </v-btn>
-                </v-card-actions>
-            </v-card>
+                        <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="close"
+                        >
+                            取消
+                        </v-btn>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="save"
+                        >
+                            保存
+                        </v-btn>
+                        </v-card-actions>
+                    </v-card>
             </v-dialog>
 
             <v-dialog v-model="dialogDelete" max-width="500px">
@@ -124,14 +125,12 @@
 
             
             <template #item.actions="{ item }" >
-                <div class="d-flex">
+                <div class="d-flex editBtns">
                     <v-btn @click="enterViewModel(item)" color="teal darken-1" dark>模型编辑</v-btn>
                     <v-btn @click="enterViewModel(item)" color="teal darken-1" dark>模型查看</v-btn>
-
                     <v-btn fab x-small dark color="success" @click="editItem(item)">
                         <v-icon small >mdi-pencil</v-icon>
                     </v-btn>
-
                     <v-btn fab color="red" dark x-small @click="deleteItem(item)">
                         <v-icon small dark>mdi-delete</v-icon>
                     </v-btn>
@@ -140,9 +139,9 @@
             <template v-slot:no-data>
                 <v-btn
                     color="primary"
-                    @click="initialize"
                 >
-                    Reset
+                    <!-- @click="initialize" -->
+                    刷新
                 </v-btn>
             </template>
         </v-data-table>
@@ -167,6 +166,8 @@
 
 <script>
 import datalist from "./config/data.json";
+import {GenNonDuplicateID} from '@/common/until.js'
+import {searchGraph,editGraph } from "@/request/apis/drawApi.js";
 
 export default {
     data(){
@@ -180,19 +181,13 @@ export default {
             {
                 text: '模型名称',
                 align: 'start',
-                value: 'graph_param.graph_name',
+                value: 'model_name',
             },
             { text: '描述', value: 'graph_param.graph_message' },
-            { text: '创建时间',value: 'graph_param.graph_createTime'},
+            { text: '创建时间',value: 'time_str'},
             { text: '操作', value: 'actions' },
             ],
-            desserts: [
-                {
-                    model_name: '模型一',
-                    model_message: '这是模型的简单描述',
-                    create_time: '2022-01-11',
-                },
-                ],
+            desserts: [],
             addModel:false,
             createModelRules:[
                 value => !!value || '此为必填项'
@@ -219,34 +214,50 @@ export default {
                     graph_createTime:"",
                     graph_type: ""
               },
-            }
+            },
+            dataLifetching:false
         }
     },
     methods:{
         editItem(item){
         this.editedIndex = this.desserts.indexOf(item)
         this.editedItem = Object.assign({}, item)
-        console.log(this.editedItem);
         this.editDialog = true;
-        console.log(this.editDialog);
-        console.log(111);
         },
         enterViewModel(item){
-            this.$router.push({
-                name:'enterModel',
-                params: {
-                    modelInfo:item,
+            editGraph({
+                graph_name:item.model_name,
+                graph_id:item.model_id,
+                time_str:item.time_str
+            }).then(res=>{
+                if (res.save_state == "success") {
+                    this.$router.push({
+                        name:'模型编辑',
+                        params: {
+                            modelInfo:res.front_graph,
+                        }
+                    })
+                }else{
+                    this.$message.alertMessage(res.failed_info);
                 }
+            }).catch(err=>{
+                console.log(err);
             })
+            
         },
         openNewModel(){
             this.addModel = false
              this.$router.push({
-                name:'enterModel',
+                name:'模型编辑',
                 params: {
                     modelInfo:{
-                        model_name:this.newModelName,
-                        model_message:this.newModelMessage,
+                        graph_param: {
+                            graph_name: this.newModelName,
+                            graph_id: GenNonDuplicateID(8),
+                            graph_message:this.newModelMessage,
+                            graph_createTime:"2022-01-14",
+                            graph_type: "json_graph"
+                        },
                         create_time:"",
                         nodeList: [],
                         lineList: []
@@ -289,10 +300,27 @@ export default {
         }
         this.close()
       },
+      fetchModelList(){
+        this.dataLifetching = true;
+        searchGraph().then(res=>{
+            if (res.save_state == "success") {
+                this.desserts = res.models;
+                this.dataLifetching = false;
+            }else{
+                this.$message.alertMessage(res.failed_info)
+                this.dataLifetching = false;
+            }
+        }).catch(err=>{
+            console.log(err);
+            this.dataLifetching = false;
+        })
+      }
 
     },
     created(){
-        this.desserts = datalist.datalist
+        this.fetchModelList();
+        
+        
     }
 }
 </script>
@@ -301,5 +329,10 @@ export default {
     .modelTable{
         width: 80vw;
         height: 700px;
+    }
+    .editBtns{
+        button{
+            margin-left: 20px;
+        }
     }
 </style>

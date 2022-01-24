@@ -7,6 +7,17 @@ module.exports = {
   publicPath: './',
 	outputDir: 'dist', //打包的目录
 	assetsDir: 'assets', //放置生成的静态资源的目录
+  devServer: {
+    proxy: { //设置代理
+			'/api': {
+				target: 'http://192.168.2.158:7654',
+				changeOrigin: true,
+				pathRewrite: {
+					'^/api': ''
+				}
+			},
+  }
+},
 
   chainWebpack: config => {
     config.resolve.alias.set('@', resolve('src'))

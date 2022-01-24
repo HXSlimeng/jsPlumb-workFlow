@@ -1,1 +1,0 @@
-import { post, get} from './http'

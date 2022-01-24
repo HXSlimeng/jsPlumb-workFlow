@@ -17,6 +17,9 @@ const methods = {
       });
       //连线双击删除事件
       this.jsPlumb.bind("dblclick",(conn, originalEvent) => {
+        console.log({
+          ...conn
+        });
         this.jsPlumb.deleteConnection(conn)
         // this.confirmDelLine(conn)
       })
@@ -135,8 +138,9 @@ const methods = {
       temp.node_params.node_id = GenNonDuplicateID(8),
       temp.node_params.top = (Math.round(top/20))*20 + "px",
       temp.node_params.left = (Math.round(left/20))*20 + "px",
-      
+      console.log(temp);
       this.addNode(temp);
+      
   },
   addLine(line) {
     let from = line.source.id;

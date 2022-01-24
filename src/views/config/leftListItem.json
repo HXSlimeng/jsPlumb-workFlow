@@ -1,0 +1,306 @@
+{
+    "listitems": [
+            {
+              "node_type": "数据载入类",
+              "items": [
+                {
+                    "node_params": { 
+                      "node_type": "fitow_csv_loader", 
+                      "node_name": "csv_loader",
+                      "node_id": "1",
+                      "dependency": [], 
+                      "submit": true,
+                      "stage": "train",
+                      "last": false
+                    }, 
+              
+                    "resource_params":{}, 
+              
+                    "op_params": {}, 
+              
+                    "train_params": {
+                      "csv_file": "./client_demo/data/iris.data", 
+                      "submit_result": true 
+                    },
+                    "predict_params": {}
+                  },
+                  {
+                    "node_params": {
+                      "node_type": "fitow_xlsx_loader",
+                      "node_name": "excel_loader",
+                      "node_id": "2",
+                      "dependency": ["1"],
+                      "submit": true,
+                      "stage": "train", 
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                    }, 
+              
+                    "train_params": {
+                        "xls_file": 0, 
+                        "sheet": 4,
+                        "min_row": 1, 
+                        "max_row":5,	
+                        "min_col":1, 
+                        "max_col":1,
+                        "submit_result": true 
+                    },
+              
+                   "predict_params": {}
+              
+                  }
+              ]
+            },
+            {
+              "action": "mdi-silverware-fork-knife",
+              "items": [
+                {
+                    "node_params": 
+                    { 
+                      "node_type": "fitow_standard_scaler",
+                      "node_name": "std_scaler_1",
+                      "node_id": "3",
+                      "dependency": ["2"],
+                      "submit": true,  
+                      "stage": "train",
+                      "last": false 
+                    },
+              
+                    "resource_params":{}, 
+              
+                    "op_params": {}, 
+              
+                    "train_params":
+                    {
+                      "submit_result": true 
+                    },
+                  
+                  
+                    "predict_params": {} 
+                  },
+                  {
+                    "node_params": {
+                      "node_type": "fitow_min_max_scaler",
+                      "node_name": "minmax_scaler",
+                      "node_id": "2",
+                      "dependency": ["1"],
+                      "submit": true,
+                      "stage": "train", 
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                    }, 
+              
+                    "train_params": {
+                      "submit_result": true 
+                    },
+              
+                   "predict_params": {}
+              
+                  },
+                  {
+                    "node_params": {
+                      "node_type": "fitow_data_slicer",
+                      "node_name": "data_slicer",
+                      "node_id": "2",
+                      "dependency": ["1"],
+                      "submit": true,
+                      "stage": "train", 
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                    }, 
+              
+                    "train_params": {
+                        "head_n": 0, 
+                        "tail_n": 4,
+                        "row_start":1,
+                        "row_end":1,
+                        "col_start":1, 
+                        "col_end":1, 
+                        "col_names":["ad","cd"], 
+                        "inverse":true, 
+                  
+                      "submit_result": true 
+                    },
+              
+                   "predict_params": {}
+              
+                  }
+              ],
+              "node_type": "数据清洗与转换"
+            },
+            {
+              "items": [
+                {
+                    "node_params": {
+                      "node_type": "fitow_linear_regression",
+                      "node_name": "fitow_linear_regression",
+                      "node_id": "2",
+                      "dependency": ["1"],
+                      "submit": true,
+                      "stage": "train",
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                    }, 
+              
+                    "train_params": {
+                      "submit_result": true
+                    },
+              
+                   "predict_params": {}
+              
+                  },
+                  {
+                    "node_params": {
+                      "node_type": "fitow_kmeans",
+                      "node_name": "minmax_kmeans_1",
+                      "node_id": "4",
+                      "dependency": ["3"],
+                      "submit": true,
+                      "stage": "train", 
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                      "n_clusters": 4, 
+                      "max_iter": 300, 
+                      "tol": 0.0001  
+                    }, 
+              
+                    "train_params": {
+                      "submit_result": true
+                    },
+              
+                   "predict_params": {}
+              
+                  },
+                  {
+                    "node_params": {
+                      "node_type": "fitow_pca",
+                      "node_name": "pca",
+                      "node_id": "4",
+                      "dependency": ["3"],
+                      "submit": true,
+                      "stage": "train",
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                      "n_components": 4, 
+                      "tol": 0.0001  
+                    }, 
+              
+                    "train_params": {
+                      "submit_result": true 
+                    },
+              
+                   "predict_params": {}
+              
+                  },
+                  {
+                    "node_params": {
+                      "node_type": "fitow_tsne",
+                      "node_name": "pca",
+                      "node_id": "4",
+                      "dependency": ["3"],
+                      "submit": true,
+                      "stage": "train", 
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                        "n_components": 4,
+                        "tol": 0.0001,  
+                        "metric":"euclidean", 
+                        "n_iter":1000 
+                    }, 
+              
+                    "train_params": {
+                      "submit_result": true 
+                    },
+              
+                   "predict_params": {}
+              
+                  },
+                  {
+                    "node_params": {
+                      "node_type": "fitow_svm_regression",
+                      "node_name": "svm_r",
+                      "node_id": "4",
+                      "dependency": ["3"],
+                      "submit": true,
+                      "stage": "train", 
+                      "last": false
+              
+                    },
+                    "resource_params":{},
+              
+                    "op_params": {
+                        "kernel": "rbf", 
+                        "tol": 0.0001, 
+                        "metric":"euclidean", 
+                        "max_iter":1000, 
+                        "degree":3, 
+                        "c":1.0 
+                    }, 
+              
+                    "train_params": {
+                      "submit_result": true 
+                    },
+              
+                   "predict_params": {}
+              
+                  }
+              ],
+              "node_type": "机器学习算法"
+            },
+            {
+              "items": [
+                {
+                  "node_params": {
+                    "node_type": "fitow_status_describe",
+                    "node_name": "fitow_status_describe_11",
+                    "node_id": "6",
+                    "dependency": ["3"],
+                    "submit": true,
+                    "stage": "train", 
+                    "last": false
+            
+                  },
+                  "resource_params":{},
+            
+                  "op_params": {
+                  }, 
+            
+                  "train_params": {
+                  },
+            
+                 "predict_params": {}
+            
+                }
+              ],
+              "node_type": "统计学习类算法"
+            }
+    ]
+}

@@ -1,24 +1,25 @@
 import axios from "axios";
 
+// axios.defaults.baseURL = "http://192.168.1.82:7654"
+
 import qs from 'qs'; //参数序列化，把数据格式转为 x-www-form-urlencoded
 
-let BASE_URL = '', loadingInstance;
+// let BASE_URL = 'http://192.168.2.158/'
 let HOST = process.env.NODE_ENV;
-switch (HOST) {
+/* switch (HOST) {
     case 'development':
         BASE_URL = '';
         break;
     case 'production':
-        BASE_URL = '';
+        axios.defaults.baseURL = "http://127.0.0.1:7654"
         break;
     default:
-        BASE_URL = '';
-}
+        break;
+} */
 axios.create({
-    //crossDomain: true,//设置cross跨域
+    crossDomain: true,//设置cross跨域
     withCredentials: false,  //跨域请求是否允许携带cookie资源凭证
-    baseurl: BASE_URL,
-    time: 1000               //请求超时时间
+    timeout: 1000               //请求超时时间
     // responseType:"arraybuffer"  返回的数据格式
 
 
@@ -116,7 +117,6 @@ axios.interceptors.response.use(response => {
 *@param {String} url [请求的url地址]
 *@param {Object} params[请求携带的参数]]
 */
-
 
 export function get(url, params) {
     return new Promise((resolve, reject) => {
