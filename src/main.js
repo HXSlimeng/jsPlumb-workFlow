@@ -6,11 +6,13 @@ import Contextmenu from 'vue-contextmenujs'
 import '@/style/index.less'
 import vuetify from './plugins/vuetify'
 import common from '@/views/components/common/index.js'
-
+import VueDraggableResizable from 'vue-draggable-resizable'
+import 'vue-draggable-resizable/dist/VueDraggableResizable.css'
+import '@/icons'
 //echarts
 import * as echarts from 'echarts/core';
 import 'echarts-gl';
-import { PieChart,BarChart,Scatter3D   } from 'echarts/charts';
+import { PieChart, BarChart, Scatter3D, LineChart } from 'echarts/charts';
 import { Scatter3DChart } from 'echarts-gl/charts';
 import { Grid3DComponent } from 'echarts-gl/components';
 import {
@@ -21,14 +23,11 @@ import {
   DatasetComponent,
   DatasetComponentOption,
   TransformComponent,
-  VisualMapComponent 
+  VisualMapComponent
 } from 'echarts/components';
-// 标签自动布局，全局过渡动画等特性
 import { LabelLayout, UniversalTransition } from 'echarts/features';
-// 引入 Canvas 渲染器，注意引入 CanvasRenderer 或者 SVGRenderer 是必须的一步
 import { CanvasRenderer } from 'echarts/renderers';
 
-// 注册必须的组件
 echarts.use([
   TitleComponent,
   TooltipComponent,
@@ -36,8 +35,9 @@ echarts.use([
   DatasetComponent,
   TransformComponent,
   LegendComponent,
-  PieChart ,
+  PieChart,
   BarChart,
+  LineChart,
   Scatter3DChart,
   Grid3DComponent,
   VisualMapComponent,
@@ -47,10 +47,11 @@ echarts.use([
 ]);
 
 Vue.config.productionTip = false
-Vue.use(common);
 Vue.prototype.$echarts = echarts
+Vue.component('vue-draggable-resizable', VueDraggableResizable)
 
-Vue.use(Contextmenu);
+
+Vue.use(Contextmenu).use(common);
 new Vue({
   router,
   store,

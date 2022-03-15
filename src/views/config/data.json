@@ -1,124 +1,120 @@
 {
     "datalist": [
         {
-            
             "graph_param": {
-                "graph_name": "demo_graph",
-                "graph_id": "graph_index_1",
-                "graph_message":"描述信息",
-                "graph_createTime":"2022-01-14",
+                "graph_name": "ETL名称",
+                "graph_id": "2qsc1nv3ii2000",
+                "graph_message": "ETL信息",
+                "graph_createTime": "2022-01-14",
                 "graph_type": "json_graph"
-              },
+            },
+            "create_time": "",
             "nodeList": [
                 {
                     "node_params": {
-                        "node_type": "根节点",
-                        "message": "这是详情信息",
-                        "node_name": "nodeName",
-                        "submit": false,
-                        "submit_result": false,
-                        "last": true,
-                        "node_id": "3sljxxsw41a000",
-                        "top": "300px",
-                        "left": "260px"
-                    },
-                    "resource_params": [],
-                    "op_params": {},
-                    "train_params": {
-                        "xls_file": "./client_demo/data/iris.xlsx",
-                        "sheet": "",
-                        "min_row": "",
-                        "min_col": "",
-                        "max_row": "",
-                        "max_col": "",
-                        "additional_run_kwargs": {
-                            "submit_result": false
-                        },
-                        "predict_params": {}
-                    }
-                },
-                {
-                    "node_params": {
-                        "node_type": "数据源",
-                        "message": "这是详情信息",
-                        "node_name": "nodeName",
+                        "node_type": "fitow_standard_scaler",
+                        "node_name": "std_scaler_1",
+                        "node_id": "upek42jl5qo00",
+                        "dependency": [
+                            "2"
+                        ],
                         "submit": true,
-                        "submit_result": true,
+                        "stage": "train",
                         "last": false,
-                        "node_id": "mgq1bsekpuo00",
-                        "top": "70px",
-                        "left": "270px"
+                        "top": "60px",
+                        "left": "40px"
                     },
-                    "resource_params": [],
+                    "resource_params": {},
                     "op_params": {},
                     "train_params": {
-                        "xls_file": "./client_demo/data/iris.xlsx",
-                        "sheet": "1",
-                        "min_row": "2",
-                        "min_col": "3",
-                        "max_row": "4",
-                        "max_col": "5",
-                        "additional_run_kwargs": {
-                            "submit_result": false
-                        },
-                        "predict_params": {}
+                        "submit_result": true
                     },
-                    "node_result": {
-                        "X": [
-                            123
-                        ],
-                        "Y": [
-                            123
-                        ],
-                        "addtional_node_info": {}
-                    },
-                    "node_exec_state": {
-                        "state": "success",
-                        "state_id": 0,
-                        "fail_info": ""
-                    }
+                    "predict_params": {}
                 },
                 {
                     "node_params": {
-                        "node_type": "普通数据",
-                        "message": "这是详情信息",
-                        "node_name": "nodeName",
-                        "submit": false,
-                        "submit_result": false,
+                        "node_type": "fitow_standard_scaler",
+                        "node_name": "std_scaler_1",
+                        "node_id": "5tdxeqhhrls000",
+                        "dependency": [
+                            "2"
+                        ],
+                        "submit": true,
+                        "stage": "train",
                         "last": false,
-                        "node_id": "3968wqtcsk8000",
-                        "top": "195px",
-                        "left": "245px"
+                        "top": "-40px",
+                        "left": "580px"
                     },
-                    "resource_params": [],
+                    "resource_params": {},
                     "op_params": {},
                     "train_params": {
-                        "xls_file": "./client_demo/data/iris.xlsx",
-                        "sheet": "",
-                        "min_row": "",
-                        "min_col": "",
-                        "max_row": "",
-                        "max_col": "",
-                        "additional_run_kwargs": {
-                            "submit_result": false
-                        },
-                        "predict_params": {}
-                    }
+                        "submit_result": true
+                    },
+                    "predict_params": {}
+                },
+                {
+                    "node_params": {
+                        "node_type": "fitow_standard_scaler",
+                        "node_name": "std_scaler_1",
+                        "node_id": "4hdal0tb7mw0",
+                        "dependency": [
+                            "2"
+                        ],
+                        "submit": true,
+                        "stage": "train",
+                        "last": false,
+                        "top": "740px",
+                        "left": "640px"
+                    },
+                    "resource_params": {},
+                    "op_params": {},
+                    "train_params": {
+                        "submit_result": true
+                    },
+                    "predict_params": {}
+                },
+                {
+                    "node_params": {
+                        "node_type": "fitow_min_max_scaler",
+                        "node_name": "minmax_scaler",
+                        "node_id": "57y10qk69nw00",
+                        "dependency": [
+                            "1"
+                        ],
+                        "submit": true,
+                        "stage": "train",
+                        "last": false,
+                        "top": "260px",
+                        "left": "1480px"
+                    },
+                    "resource_params": {},
+                    "op_params": {},
+                    "train_params": {
+                        "submit_result": true
+                    },
+                    "predict_params": {}
                 }
             ],
             "lineList": [
                 {
-                    "from": "mgq1bsekpuo00",
-                    "to": "3968wqtcsk8000",
+                    "from": "upek42jl5qo00",
+                    "to": "5tdxeqhhrls000",
                     "label": "连线名称",
-                    "id": "3tkqta88pvs000",
+                    "id": "1vd8uq5aalog00",
                     "Remark": ""
                 },
                 {
-                    "from": "3968wqtcsk8000",
-                    "to": "3sljxxsw41a000",
+                    "from": "5tdxeqhhrls000",
+                    "to": "4hdal0tb7mw0",
                     "label": "连线名称",
-                    "id": "3dv3euoqbr0000",
+                    "id": "zg92kwveccg00",
+                    "Remark": ""
+                },
+                {
+                    "from": "5tdxeqhhrls000",
+                    "to": "57y10qk69nw00",
+                    "label": "连线名称",
+                    "id": "h351sv56ojs00",
                     "Remark": ""
                 }
             ]

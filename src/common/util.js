@@ -1,12 +1,4 @@
-//生成指定长度的唯一ID
-export function GenNonDuplicateID(randomLength) {
-  return Number(
-    Math.random()
-      .toString()
-      .substr(3, randomLength) + Date.now()
-  ).toString(36)
-}
-export function debounce(func, wait) {
+const debounce = (func, wait) => {
   let timeout
   return function() {
     const context = this
@@ -17,7 +9,7 @@ export function debounce(func, wait) {
     }, wait)
   }
 }
-export function throttle(fn, timeout) {
+const throttle = (fn, timeout) => {
   let canRun = true
   return function() {
     if (!canRun) {

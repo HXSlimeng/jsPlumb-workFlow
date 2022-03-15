@@ -1,63 +1,98 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import enterModel from '../views/enterModel.vue'
-import ModelEditCtrl from '../views/ModelEditCtrl.vue'
-import dataManage from '../views/dataManage.vue'
-import modelPublishing from '../views/modelPublishing.vue'
-import chartArrangement from '../views/chartArrangement.vue'
-  
+import EnterModel from '../views/enterModel/enterModel.vue'
+import ModelEditCtrl from '../views/ModelEditCtrl/ModelEditCtrl.vue'
+import DataManage from '../views/dataManage/dataManage.vue'
+import ModelPublishing from '../views/modelPublishing.vue'
+import mangageEtl from '../views/mangageEtl/mangageEtl.vue'
+import PreviewDBTable from "../views/components/dataManage/previewDBTable.vue";
+
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/dataManage',
-    name: '数据管理',
-    component: dataManage,
-    meta:{
-      menuList:true,
-      icon:'mdi-database-cog',
+    name: '数据源管理',
+    component: DataManage,
+    meta: {
+      menuList: true,
+      icon: 'mdi-database-cog',
+    },
+    children: [
+      { path: '', component: () => import('../views/components/dataManage/dataBaseSource') },
+      { path: 'file', component: () => import('../views/components/dataManage/fileSource') },
+      { path: 'interface', component: () => import('../views/components/dataManage/interFaceSource') }
+
+    ]
+  },
+  {
+    path: '/previewDBTable',
+    name: '数据源管理',
+    component: PreviewDBTable,
+    meta: {
     }
   },
   {
     path: '/enterModel',
     name: '模型编辑',
-    component: enterModel,
-    meta:{
-      menuList:false,
-      icon:'mdi-sitemap'
+    component: EnterModel,
+    meta: {
+      menuList: false,
+      icon: 'mdi-sitemap'
+    }
+  },
+  {
+    path: '/mangageEtl',
+    name: '数据ETL管理',
+    component: mangageEtl,
+    meta: {
+      menuList: true,
+      icon: 'mdi-arrange-bring-forward'
     }
   },
   {
     path: '/',
     name: '模型管理',
     component: ModelEditCtrl,
-    meta:{
-      menuList:true,
-      icon:'mdi-view-dashboard'
+    meta: {
+      menuList: true,
+      icon: 'mdi-view-dashboard'
     }
   },
+
   {
     path: '/modelPublishing',
-    name: '模型发布',
-    component: modelPublishing,
-    meta:{
-      menuList:true,
-      icon:'mdi-publish'
+    name: 'ETL发布',
+    component: ModelPublishing,
+    meta: {
+      menuList: false,
+      icon: 'mdi-publish'
+    }
+  },
+
+  {
+    path: '/buildCharts',
+    name: '图表生成测试',
+    component: () => import('../views/buildCharts/buildCharts'),
+    meta: {
+      menuList: true,
+      icon: 'mdi-arrange-bring-forward'
     }
   },
   {
-    path: '/chartArrangement',
-    name: '图标编排',
-    component: chartArrangement,
-    meta:{
-      menuList:true,
-      icon:'mdi-arrange-bring-forward'
+    path: '/previewChartsTest',
+    name: 'previewChartsTest',
+    component: () => import('../views/buildCharts/preview'),
+    meta: {
+      menuList: false,
+      icon: 'mdi-arrange-bring-forward',
+      hideNav: true
     }
   },
 ]
 
 const router = new VueRouter({
-  mode:'history',
+  mode: 'history',
   routes
 })
 

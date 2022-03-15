@@ -1,0 +1,50 @@
+{
+    "listitems": [
+        {
+            "node_type": "输入输出",
+            "items": [
+                {
+                    "node_params": {
+                        "node_type": "fitow_csv_loader",
+                        "node_name": "csv_loader",
+                        "node_id": "1",
+                        "dependency": [],
+                        "submit": true,
+                        "stage": "train",
+                        "last": false
+                    },
+                    "resource_params": {},
+                    "op_params": {},
+                    "train_params": {
+                        "csv_file": "./client_demo/data/iris.data",
+                        "submit_result": true
+                    },
+                    "predict_params": {}
+                }
+            ]
+        },
+        {
+            "node_type": "快速装载",
+            "items": [
+                {
+                    "node_params": {
+                        "node_type": "fitow_csv_loader",
+                        "node_name": "csv_loader",
+                        "node_id": "1",
+                        "dependency": [],
+                        "submit": true,
+                        "stage": "train",
+                        "last": false
+                    },
+                    "resource_params": {},
+                    "op_params": {},
+                    "train_params": {
+                        "csv_file": "./client_demo/data/iris.data",
+                        "submit_result": true
+                    },
+                    "predict_params": {}
+                }
+            ]
+        }
+    ]
+}
