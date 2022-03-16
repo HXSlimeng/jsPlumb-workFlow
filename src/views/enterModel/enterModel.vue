@@ -2,68 +2,62 @@
   <div>
     <!-- Page Header -->
     <v-card class="editToolbar d-flex align-center justify-end" elevation>
-      <v-card-title class="text-h5 pl-6" style="position: absolute; left: 0">模型编辑</v-card-title>
+      <v-card-title class="text-h5 pl-6" style="position: absolute; left: 0">
+        <slot name="breadcrumb"></slot>
+      </v-card-title>
       <div class="mainCtrl mr-10">
-        <v-btn class="mx-3" @click="goSaveGraph">
-          <v-icon dark color="blue" class>mdi-download-box</v-icon>保存
-        </v-btn>
-        <v-btn class="mx-3" @click="runAllGraph">
-          <v-icon dark color="blue" class>mdi-play-box</v-icon>执行
-        </v-btn>
         <v-btn class="ml-10 teal darken-1" @click="backToEdit" dark>返回模型管理</v-btn>
       </div>
       <div></div>
     </v-card>
     <div class="flow_region">
-      <div>
-        <!-- <div v-for="item in nodeTypeList" :key="item.type" class="node" draggable="true" @dragstart="drag($event, item)">
+      <!-- <div v-for="item in nodeTypeList" :key="item.type" class="node" draggable="true" @dragstart="drag($event, item)">
           <div class="log">
             <img :src="item.logImg" alt="">
           </div>
           <div class="name">{{item.typeName}}</div>
-        </div>-->
-        <!-- Left Aside -->
-        <v-navigation-drawer
-          v-model="leftBarVis"
-          :absolute="false"
-          :hide-overlay="true"
-          :stateless="true"
-        >
-          <v-list nav dense>
-            <v-list-group
-              v-for="item in listItem"
-              :key="item.node_type"
-              v-model="item.active"
-              no-action
+      </div>-->
+      <!-- Left Aside -->
+      <v-navigation-drawer
+        v-model="leftBarVis"
+        :absolute="false"
+        :hide-overlay="true"
+        :stateless="true"
+      >
+        <v-list nav dense>
+          <v-list-group
+            v-for="item in listItem"
+            :key="item.node_type"
+            v-model="item.active"
+            no-action
+          >
+            <template #prependIcon>
+              <v-icon color="#0D47A1">{{ item.active ? "mdi-database-settings" : "mdi-database" }}</v-icon>
+            </template>
+            <template #activator>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.node_type"></v-list-item-title>
+              </v-list-item-content>
+            </template>
+            <v-list-item
+              v-for="child in item.items"
+              :disabled="child.disabled"
+              :key="child.node_params.node_type"
+              draggable="true"
+              @dragstart="drag($event, child)"
+              class="leftDragItem"
             >
-              <template #prependIcon>
-                <v-icon color="#0D47A1">{{ item.active ? "mdi-database-settings" : "mdi-database" }}</v-icon>
-              </template>
-              <template #activator>
-                <v-list-item-content>
-                  <v-list-item-title v-text="item.node_type"></v-list-item-title>
-                </v-list-item-content>
-              </template>
-              <v-list-item
-                v-for="child in item.items"
-                :disabled="child.disabled"
-                :key="child.node_params.node_type"
-                draggable="true"
-                @dragstart="drag($event, child)"
-                class="leftDragItem"
-              >
-                <v-icon color="#0D47A1">mdi-database</v-icon>
-                <v-list-item-content>
-                  <v-list-item-title>
-                    {{ getNameByNodeType(child.node_params.node_type) }}
-                    <v-icon class="float-right">mdi-drag-variant</v-icon>
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </v-list-group>
-          </v-list>
-        </v-navigation-drawer>
-      </div>
+              <v-icon color="#0D47A1">mdi-database</v-icon>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ getNameByNodeType(child.node_params.node_type) }}
+                  <v-icon class="float-right">mdi-drag-variant</v-icon>
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list-group>
+        </v-list>
+      </v-navigation-drawer>
 
       <div
         id="flowWrap"
@@ -72,7 +66,19 @@
         @drop="drop($event)"
         @dragover="allowDrop($event)"
       >
-        <v-subheader class="text-h5" style="color: #00695c">{{ data.graph_param.graph_name }}</v-subheader>
+        <div class="graphEditTool d-flex justify-space-between align-center elevation-1">
+          <div class="text-h5 ml-2" style="color: #00695c;">{{ data.graph_param.graph_name }}</div>
+          <v-btn-toggle class="mr-2">
+            <v-btn>撤销</v-btn>
+            <v-btn>还原</v-btn>
+            <v-btn @click="goSaveGraph">
+              <v-icon dark color="blue" class>mdi-download-box</v-icon>保存
+            </v-btn>
+            <v-btn @click="runAllGraph">
+              <v-icon dark color="blue" class>mdi-play-box</v-icon>执行
+            </v-btn>
+          </v-btn-toggle>
+        </div>
         <div id="flow">
           <div
             v-show="auxiliaryLine.isShowXLine"
@@ -128,7 +134,7 @@
         :stateless="true"
         width="600"
         :expand-on-hover="false"
-        height="94%"
+        class="pt-16 rightOverlay"
       >
         <template v-slot:prepend>
           <v-list-item two-line>
@@ -156,15 +162,9 @@
             </div>
           </v-list-item>
           <v-list-item>
-            <v-tabs
-              background-color="#e2ded3"
-              color="#1a2639"
-              v-model="rightOverlayTabs"
-              @change="rightOverylayTabsChange"
-              class="tabsCtl"
-            >
+            <v-tabs v-model="rightOverlayTabs" @change="rightOverylayTabsChange" class="tabsCtl">
               <v-tab>基本数据</v-tab>
-              <v-tab v-if="false">执行结果</v-tab>
+              <v-tab>执行结果</v-tab>
               <v-tab v-if="!isETLPage">图表</v-tab>
               <v-tab v-if="!isETLPage">3d图表</v-tab>
             </v-tabs>
@@ -172,95 +172,90 @@
         </template>
         <div class="rightTabs">
           <div class="tabItems">
-            <v-tabs-items v-model="rightOverlayTabs">
-              <v-tab-item>
-                <v-card class="ma-2 pa-2">
-                  <v-text-field v-model="rightOverlay.info.node_params.node_name" solo dense>
-                    <template #prepend>
-                      <div class="text-h6 rOverlayTit">节点名称:</div>
-                    </template>
-                  </v-text-field>
-                  <v-text-field v-model="rightOverlay.info.node_params.message" disabled solo dense>
-                    <template #prepend>
-                      <div class="text-h6 rOverlayTit">帮助信息:</div>
-                    </template>
-                  </v-text-field>
-                  <v-switch
-                    v-model="rightOverlay.info.train_params.submit_result"
-                    label="节点是否返回节点计算结果"
-                  ></v-switch>
-                  <v-text-field
-                    v-if="rightOverlay.info.node_result"
-                    v-model="rightOverlay.info.node_result.addtional_node_info"
-                    disabled
-                    solo
-                    dense
-                  >
-                    <template #prepend>
-                      <div class="text-h6 rOverlayTit">计算结果:</div>
-                    </template>
-                  </v-text-field>
-                  <v-expansion-panels :accordion="true">
-                    <v-expansion-panel>
-                      <v-expansion-panel-header color="#daeaf6">train_params</v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <v-list>
-                          <v-list-item
-                            v-for="(v, index) in rightOverlay.info.train_params"
-                            :key="index"
-                          >
-                            <v-list-item-content>{{ index }}:</v-list-item-content>
-                            <v-list-item-content>{{ v }}</v-list-item-content>
-                          </v-list-item>
-                        </v-list>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
-                    <v-expansion-panel>
-                      <v-expansion-panel-header color="#daeaf6">op_params</v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <v-list>
-                          <v-list-item
-                            v-for="(v, index) in rightOverlay.info.op_params"
-                            :key="index"
-                          >
-                            <v-list-item-content>{{ index }}:</v-list-item-content>
-                            <v-list-item-content>{{ v }}</v-list-item-content>
-                          </v-list-item>
-                        </v-list>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
-                    <v-expansion-panel>
-                      <v-expansion-panel-header color="#daeaf6">resource_params</v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <v-list>
-                          <v-list-item
-                            v-for="(v, index) in rightOverlay.info
-                            .resource_params"
-                            :key="index"
-                          >
-                            <v-list-item-content>{{ index }}:</v-list-item-content>
-                            <v-list-item-content>{{ v }}</v-list-item-content>
-                          </v-list-item>
-                        </v-list>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
-                    <v-expansion-panel>
-                      <v-expansion-panel-header color="#daeaf6">addtional_node_info</v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <v-list v-if="rightOverlay.info.node_result">
-                          <v-list-item
-                            v-for="(v, index) in rightOverlay.info.node_result
-                            .addtional_node_info"
-                            :key="index"
-                          >
-                            <v-list-item-content>{{ index }}:</v-list-item-content>
-                            <v-list-item-content>{{ v }}</v-list-item-content>
-                          </v-list-item>
-                        </v-list>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
-                  </v-expansion-panels>
-                </v-card>
+            <v-tabs-items v-model="rightOverlayTabs" class="mx-4">
+              <v-tab-item class="pt-4">
+                <v-text-field v-model="rightOverlay.info.node_params.node_name" solo dense>
+                  <template #prepend>
+                    <div class="text-h6 rOverlayTit">节点名称:</div>
+                  </template>
+                </v-text-field>
+                <v-text-field v-model="rightOverlay.info.node_params.message" disabled solo dense>
+                  <template #prepend>
+                    <div class="text-h6 rOverlayTit">帮助信息:</div>
+                  </template>
+                </v-text-field>
+                <v-switch
+                  v-model="rightOverlay.info.train_params.submit_result"
+                  label="节点是否返回节点计算结果"
+                ></v-switch>
+                <v-text-field
+                  v-if="rightOverlay.info.node_result"
+                  v-model="rightOverlay.info.node_result.addtional_node_info"
+                  disabled
+                  solo
+                  dense
+                >
+                  <template #prepend>
+                    <div class="text-h6 rOverlayTit">计算结果:</div>
+                  </template>
+                </v-text-field>
+                <v-expansion-panels :accordion="true">
+                  <v-expansion-panel>
+                    <v-expansion-panel-header color="#daeaf6">train_params</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-list>
+                        <v-list-item
+                          v-for="(v, index) in rightOverlay.info.train_params"
+                          :key="index"
+                        >
+                          <v-list-item-content>{{ index }}:</v-list-item-content>
+                          <v-list-item-content>{{ v }}</v-list-item-content>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                  <v-expansion-panel>
+                    <v-expansion-panel-header color="#daeaf6">op_params</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-list>
+                        <v-list-item v-for="(v, index) in rightOverlay.info.op_params" :key="index">
+                          <v-list-item-content>{{ index }}:</v-list-item-content>
+                          <v-list-item-content>{{ v }}</v-list-item-content>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                  <v-expansion-panel>
+                    <v-expansion-panel-header color="#daeaf6">resource_params</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-list>
+                        <v-list-item
+                          v-for="(v, index) in rightOverlay.info
+                          .resource_params"
+                          :key="index"
+                        >
+                          <v-list-item-content>{{ index }}:</v-list-item-content>
+                          <v-list-item-content>{{ v }}</v-list-item-content>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                  <v-expansion-panel>
+                    <v-expansion-panel-header color="#daeaf6">addtional_node_info</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-list v-if="rightOverlay.info.node_result">
+                        <v-list-item
+                          v-for="(v, index) in rightOverlay.info.node_result
+                          .addtional_node_info"
+                          :key="index"
+                        >
+                          <v-list-item-content>{{ index }}:</v-list-item-content>
+                          <v-list-item-content>{{ v }}</v-list-item-content>
+                        </v-list-item>
+                      </v-list>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
 
                 <v-list dense v-if="false">
                   <v-list-item v-for="(item, index) in rightOverlay.info" :key="index">
@@ -293,25 +288,23 @@
                 </v-list>
               </v-tab-item>
               <v-tab-item>
-                <v-card class="ma-2">
-                  <v-card-title class="my-0 text-h5">执行结果</v-card-title>
-                  <v-data-table
-                    :headers="headers"
-                    :items="
-                      rightOverlay.info.node_result
-                        ? rightOverlay.info.node_result.X
-                        : []
-                    "
-                    :items-per-page="10"
-                    class="elevation-1"
-                  >
-                    <template #item="{ item }">
-                      <tr>
-                        <td v-for="(chdItem, index) in item" :key="index">{{ item[index] }}</td>
-                      </tr>
-                    </template>
-                  </v-data-table>
-                  <!-- <template #item.one="{ item }">
+                <v-data-table
+                  :headers="headers"
+                  :items="
+                    rightOverlay.info.node_result
+                      ? rightOverlay.info.node_result.X
+                      : []
+                  "
+                  :items-per-page="10"
+                  class="elevation-1"
+                >
+                  <template #item="{ item }">
+                    <tr>
+                      <td v-for="(chdItem, index) in item" :key="index">{{ item[index] }}</td>
+                    </tr>
+                  </template>
+                </v-data-table>
+                <!-- <template #item.one="{ item }">
                     {{item[0]}}
                   </template>
                   <template #item.two="{ item }">
@@ -325,8 +318,7 @@
                   </template>
                   <template #item.five="{ item }">
                     {{item[4]}}
-                  </template>-->
-                </v-card>
+                </template>-->
               </v-tab-item>
               <v-tab-item>
                 <Gener-charts></Gener-charts>
@@ -340,10 +332,8 @@
                 </v-card>-->
               </v-tab-item>
               <v-tab-item>
-                <v-card class="mx-2 my-2">
-                  <v-card-title class="my-0 text-h5">数据分析3d散点图</v-card-title>
-                  <div id="scatter3D"></div>
-                </v-card>
+                <v-card-title class="my-0 text-h5">数据分析3d散点图</v-card-title>
+                <div id="scatter3D"></div>
               </v-tab-item>
             </v-tabs-items>
           </div>
@@ -623,7 +613,6 @@ export default {
     },
     flowToJSON() {
       let body = JSON.stringify(this.data)
-      console.log(body)
     },
     goSaveGraph() {
       console.log(this.data)
@@ -699,7 +688,6 @@ export default {
     },
     backToEdit() {
       let modelChange = this.checkIfModelChange()
-      console.log(modelChange)
       if (modelChange) {
         console.log('modelHasChanged!!!')
       }
@@ -800,6 +788,12 @@ export default {
     flex-grow: 1;
     // background-image: url("../assets/point.png");
     background: #daeaf6;
+    .graphEditTool {
+      height: 62px;
+      background-color: #ffffff;
+      position: relative;
+      z-index: 2;
+    }
 
     #flow {
       position: relative;

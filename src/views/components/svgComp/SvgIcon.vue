@@ -1,6 +1,6 @@
 <template>
-  <svg :class="svgClass" aria-hidden="true">
-    <use :xlink:href="iconName"></use>
+  <svg :class="svgClass" aria-hidden="false">
+    <use :xlink:href="iconName" :fill="color" />
   </svg>
 </template>
 
@@ -14,6 +14,9 @@ export default {
     },
     className: {
       type: String
+    },
+    color: {
+      type: String,
     }
   },
   computed: {

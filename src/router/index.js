@@ -5,7 +5,7 @@ import ModelEditCtrl from '../views/ModelEditCtrl/ModelEditCtrl.vue'
 import DataManage from '../views/dataManage/dataManage.vue'
 import ModelPublishing from '../views/modelPublishing.vue'
 import mangageEtl from '../views/mangageEtl/mangageEtl.vue'
-import PreviewDBTable from "../views/components/dataManage/previewDBTable.vue";
+import PreviewDBTable from '../views/components/dataManage/previewDBTable.vue'
 
 Vue.use(VueRouter)
 
@@ -16,21 +16,20 @@ const routes = [
     component: DataManage,
     meta: {
       menuList: true,
-      icon: 'mdi-database-cog',
+      icon: '数据源管理'
     },
     children: [
-      { path: '', component: () => import('../views/components/dataManage/dataBaseSource') },
+      { path: '', redirect: 'database' },
+      { path: 'database', component: () => import('../views/components/dataManage/dataBaseSource') },
       { path: 'file', component: () => import('../views/components/dataManage/fileSource') },
       { path: 'interface', component: () => import('../views/components/dataManage/interFaceSource') }
-
     ]
   },
   {
     path: '/previewDBTable',
     name: '数据源管理',
     component: PreviewDBTable,
-    meta: {
-    }
+    meta: {}
   },
   {
     path: '/enterModel',
@@ -47,16 +46,24 @@ const routes = [
     component: mangageEtl,
     meta: {
       menuList: true,
-      icon: 'mdi-arrange-bring-forward'
+      icon: '数据ETL管理'
     }
   },
   {
-    path: '/',
+    path: '/manageModel',
     name: '模型管理',
     component: ModelEditCtrl,
     meta: {
       menuList: true,
-      icon: 'mdi-view-dashboard'
+      icon: '模型管理'
+    }
+  },
+  {
+    path: '',
+    redirect: '/manageModel',
+    meta: {
+      menuList: false,
+      icon: 'mdi-arrange-bring-forward'
     }
   },
 
@@ -66,17 +73,17 @@ const routes = [
     component: ModelPublishing,
     meta: {
       menuList: false,
-      icon: 'mdi-publish'
+      icon: 'ETL发布'
     }
   },
 
   {
     path: '/buildCharts',
-    name: '图表生成测试',
+    name: '可视化分析',
     component: () => import('../views/buildCharts/buildCharts'),
     meta: {
       menuList: true,
-      icon: 'mdi-arrange-bring-forward'
+      icon: '可视化分析'
     }
   },
   {
@@ -88,7 +95,7 @@ const routes = [
       icon: 'mdi-arrange-bring-forward',
       hideNav: true
     }
-  },
+  }
 ]
 
 const router = new VueRouter({

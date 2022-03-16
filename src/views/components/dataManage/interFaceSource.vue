@@ -1,6 +1,6 @@
 <template>
-  <div class="content clear_fix my-3 mx-3">
-    <div class="editBox">
+  <div class="content clear_fix">
+    <div class="editBox editBox d-flex justify-end align-center">
       <v-dialog v-model="editSourceDialog" max-width="400px">
         <template v-slot:activator="{ on, attrs }">
           <v-btn color="primary" dark v-bind="attrs" v-on="on">新建数据表</v-btn>
@@ -21,6 +21,8 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+      <v-btn outlined color="error">批量删除</v-btn>
+
       <v-text-field
         outlined
         dense
@@ -29,7 +31,6 @@
         hide-details
         v-model="searchVal"
         @click:append="search"
-        class="ml-auto"
       ></v-text-field>
     </div>
     <v-data-table

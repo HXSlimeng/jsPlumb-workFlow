@@ -1,33 +1,20 @@
 <template>
   <div class="d-flex flex-column">
-    <v-card
+    <!-- <v-card
       class="text-h5 d-flex justify-space-between align-center pl-6"
       height="50"
       style="width: 100%"
-    >数据源管理</v-card>
-    <div class="main_container d-flex">
-      <v-navigation-drawer
-        v-model="drawer"
-        :hide-overlay="true"
-        :stateless="true"
-        :absolute="false"
-        width="300px"
-      >
-        <v-divider></v-divider>
-
-        <v-list dense nav :flat="true">
-          <v-list-item-group v-model="selectedData" color="primary" mandatory>
-            <v-list-item v-for="item in typeOfSource" :key="item.title" link>
-              <v-list-item-icon>
-                <v-icon>{{ item.icon }}</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list-item-group>
-        </v-list>
-      </v-navigation-drawer>
+    >数据源管理</v-card>-->
+    <div class="main_container px-2">
+      <v-tabs slider-color="#009D89" class="selectBar">
+        <v-tab
+          active-class="activeColor"
+          v-for="(item, index) in routeLinks"
+          :key="item.name"
+          :to="'/dataManage/' + item.addr"
+          :disabled="index == 2"
+        >{{ item.name }}</v-tab>
+      </v-tabs>
       <router-view></router-view>
     </div>
   </div>
@@ -54,20 +41,28 @@ export default {
         { text: "创建时间", value: "time_str" },
         { text: "操作", value: "actions" },
       ],
-      routeMap: ['', 'file', 'interface']
+      routeLinks: [
+        {
+          name: '连接池数据',
+          addr: 'database'
+        },
+        {
+          name: '文件数据',
+          addr: 'file'
+        },
+        {
+          name: '接口数据源',
+          addr: 'interface'
+        }
+      ]
     };
   },
   methods: {
-    fetchSourceData(newVal, oldVal) {
-      if (newVal !== false && newVal !== oldVal) {
-        this.$router.push('/dataManage/' + this.routeMap[newVal])
-      }
-    }
+
   },
   watch: {
-    selectedData: {
-      handler: 'fetchSourceData',
-      immediate: false
+    selectedData(newVal, oldVal) {
+      console.log(newVal, oldVal);
     }
   }
 };
@@ -77,10 +72,16 @@ export default {
 .main_container {
   position: relative;
   height: 100vh;
+  .selectBar {
+    position: absolute;
+  }
 }
 .dataSourceBarTitle {
   button {
     float: right;
   }
+}
+.activeColor {
+  color: #009d89;
 }
 </style>

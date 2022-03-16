@@ -3,8 +3,9 @@
     <!-- <v-system-bar app>
       <v-spacer></v-spacer>
     </v-system-bar>-->
-    <v-app-bar app elevation="1" dense v-if="!$route.meta.hideNav">
+    <v-app-bar app elevation="1" dense v-if="!$route.meta.hideNav" height="50px">
       <v-img :src="fitowIcon" max-height="80" max-width="160"></v-img>
+      <div class="text-h5 ml-4">AI大数据分析平台</div>
       <!-- <v-app-bar-title class="text-h5">绘制流程图</v-app-bar-title> -->
     </v-app-bar>
     <v-navigation-drawer
@@ -15,8 +16,6 @@
       :stateless="true"
       permanent
       expand-on-hover
-      dark
-      color="rgb(40,44,52)"
     >
       <!-- <v-avatar
           class="d-block text-center mx-auto mt-4"
@@ -26,34 +25,31 @@
 
       <!-- <v-divider class="mx-3 my-5"></v-divider> -->
       <v-list nav>
-        <v-list-item
-          v-for="(item, index) in menuRoute"
-          :key="index"
-          :to="item.path"
-        >
-          <v-list-item-icon>
-            <v-icon color="rgb(97,218,251)">{{ item.meta.icon }}</v-icon>
-          </v-list-item-icon>
-
-          <v-list-item-content>
-            <v-list-item-title>{{ item.name }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+        <v-list-item-group v-model="selectedItem" color="primary">
+          <v-list-item v-for="item in menuRoute" :key="item.meta.icon" :to="item.path">
+            <v-list-item-icon>
+              <svg-icon :icon-class="item.meta.icon"></svg-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ item.name }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
 
     <v-main>
-      <router-view />
+      <router-view>
+        <template #breadcrumb>
+          <v-breadcrumbs :items="breadcrumbItem" large class="py-0"></v-breadcrumbs>
+        </template>
+      </router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
 import router from "@/router/index";
-// import client from "./views/config/nodeRedis.js";
-// console.log(client);
-// var redis = require('redis');
-// console.log(redis);
 
 export default {
   name: "App",
@@ -72,6 +68,20 @@ export default {
       "mdi-arrange-bring-forward",
     ],
     fitowIcon: require("@/assets/fitow.png"),
+    breadcrumbItem: [{
+      text: '模型管理',
+      disabled: false,
+      to: '/manageModel',
+      exact: true
+    },
+    {
+      text: '模型编辑',
+      disabled: false,
+      to: 'enterModel',
+      exact: true
+    }
+    ],
+    selectedItem: '0'
   }),
   methods: {
     routerLinkTo(route) {
@@ -86,16 +96,29 @@ export default {
     },
   },
   watch: {
-    $route(to, from) {},
+    $route(to, from) {
+      switch (to.path) {
+        case '':
+
+          break;
+
+        default:
+          break;
+      }
+    }
   },
 };
 </script>
 <style lang="less" scoped>
+@import url("./style/vuetifyPreset.less");
 /deep/.v-app-bar-title__placeholder {
   text-overflow: unset;
+}
+.noActive {
+  color: black !important;
+}
+.active {
+  color: #009d89 !important;
 }
 </style>
 
-/deep/.v-app-bar-title__placeholder {
-  text-overflow: unset;
-}

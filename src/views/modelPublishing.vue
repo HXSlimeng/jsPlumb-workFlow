@@ -45,7 +45,7 @@
           @input="itemsPerPage = parseInt($event, 10)"
         ></v-text-field>
       </div>
-    </div> -->
+    </div>-->
     <Model-comp>
       <template slot-scope="scope">
         {{ scope.headerInfo.graph_name }}
@@ -54,16 +54,10 @@
         }}
       </template>
     </Model-comp>
-    <v-navigation-drawer
-      absolute
-      permanent
-      right
-      style="margin-top: 51px"
-      width="300"
-    >
+    <v-navigation-drawer absolute permanent right style="margin-top: 51px" width="300">
       <template v-slot:prepend>
         <v-list-item two-line>
-          <v-list-item-content> </v-list-item-content>
+          <v-list-item-content></v-list-item-content>
         </v-list-item>
       </template>
 
@@ -222,9 +216,5 @@ export default {
 };
 </script>
 
-<style>
-.modelTable {
-  width: 80vw;
-  /* height: 700px; */
-}
+<style scoped>
 </style>

@@ -1,52 +1,6 @@
 <template>
-  <div class="content clear_fix my-3 mx-3">
-    <div class="editBox">
-      <v-dialog v-model="selectSourceDialog" max-width="600px">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn color="primary" dark v-bind="attrs" v-on="on">新建数据表</v-btn>
-        </template>
-        <v-card>
-          <div v-for="item in typeOfDataBase" :key="item.title">
-            <v-subheader>{{ item.title }}</v-subheader>
-
-            <v-container class="pa-3">
-              <v-row>
-                <v-col cols="3" v-for="source in item.dataList" :key="source.name">
-                  <v-hover v-slot="{ hover }">
-                    <v-card
-                      class="dataBaseItem"
-                      :elevation="hover ? 12 : 2"
-                      @click="dataBaseItem(source)"
-                    >
-                      <div style="height: 80px;"></div>
-                      <span>{{ source.name }}</span>
-                    </v-card>
-                  </v-hover>
-                </v-col>
-              </v-row>
-            </v-container>
-          </div>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="editSourceDialog" max-width="400px">
-        <v-card>
-          <v-card-title class="blue-grey lighten-5">新建数据源</v-card-title>
-          <div class="inputArea pa-3">
-            <v-text-field class="inputItem" outlined dense label="数据源名称"></v-text-field>
-            <v-text-field class="inputItem" outlined dense label="描述"></v-text-field>
-            <v-text-field class="inputItem" outlined dense label="驱动类型"></v-text-field>
-            <v-text-field class="inputItem" outlined dense label="链接地址"></v-text-field>
-            <v-text-field class="inputItem" outlined dense label="用户名"></v-text-field>
-            <v-text-field class="inputItem" outlined dense label="密码"></v-text-field>
-          </div>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn>测试链接</v-btn>
-            <v-btn>取消</v-btn>
-            <v-btn>确定</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+  <div class="content">
+    <div class="editBox d-flex justify-end align-center">
       <v-text-field
         outlined
         dense
@@ -55,23 +9,75 @@
         hide-details
         v-model="searchVal"
         @click:append="search"
-        class="ml-auto"
+        class="ml-2"
       ></v-text-field>
+      <v-dialog v-model="selectSourceDialog" max-width="1021px">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn color="primary" dark v-bind="attrs" v-on="on" class="ml-2">新建数据表</v-btn>
+        </template>
+        <v-card>
+          <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">新建数据源</v-card-title>
+          <div class="pa-5">
+            <v-tabs v-model="databaseType" color="primary" slider-color="primary">
+              <v-tab v-for="item in typeOfDataBase" :key="item.title">{{ item.title }}</v-tab>
+            </v-tabs>
+            <v-tabs-items v-model="databaseType">
+              <v-tab-item v-for="item in typeOfDataBase" :key="item.title">
+                <v-container>
+                  <v-row>
+                    <v-col cols="2" v-for="source in item.dataList" :key="source.name">
+                      <v-hover v-slot="{ hover }">
+                        <v-card
+                          class="dataBaseItem"
+                          :elevation="hover ? 5 : 2"
+                          @click="dataBaseItem(source)"
+                        >
+                          <div style="height: 80px;"></div>
+                          <span>{{ source.name }}</span>
+                        </v-card>
+                      </v-hover>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-tab-item>
+            </v-tabs-items>
+          </div>
+        </v-card>
+      </v-dialog>
+      <v-btn outlined color="error" class="ml-2">批量删除</v-btn>
+      <v-dialog v-model="editSourceDialog" max-width="400px">
+        <v-card>
+          <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">新建数据源</v-card-title>
+          <div class="inputArea pa-3 d-flex-column">
+            <v-text-field class="inputItem" outlined dense label="数据源名称"></v-text-field>
+            <v-text-field class="inputItem" outlined dense label="描述"></v-text-field>
+            <v-text-field class="inputItem" outlined dense label="驱动类型"></v-text-field>
+            <v-text-field class="inputItem" outlined dense label="链接地址"></v-text-field>
+            <v-btn class="mt-n5 mb-2" color="primary" style="position: absolute; right: 10px;">测试链接</v-btn>
+            <v-text-field class="inputItem mt-5" outlined dense label="用户名"></v-text-field>
+            <v-text-field class="inputItem" outlined dense label="密码"></v-text-field>
+          </div>
+          <v-card-actions class="d-flex justify-center pb-7">
+            <v-btn color="primary" class="mr-8">确定</v-btn>
+            <v-btn>取消</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </div>
     <v-data-table
       :headers="dbHeaders"
       :items="dbSource"
       disable-sort
       item-key="graph_param.graph_id"
-      class="elevation-1"
+      absolute
     >
       <template #item.actions="{ item }">
         <div class="d-flex">
-          <v-btn color="primary" dark @click="previewDBTable(item)">查看库表</v-btn>
-          <v-btn color="primary" dark>更新数据</v-btn>
-          <v-btn color="primary" dark>编辑</v-btn>
-          <v-btn color="primary" dark>查看</v-btn>
-          <v-btn color="primary" dark @click="deleteItem(item)">删除</v-btn>
+          <v-btn color="primary" text @click="previewDBTable(item)">查看库表</v-btn>
+          <v-btn color="primary" text>更新数据</v-btn>
+          <v-btn color="primary" text>编辑</v-btn>
+          <v-btn color="primary" text>查看</v-btn>
+          <v-btn color="primary" text @click="deleteItem(item)">删除</v-btn>
         </div>
       </template>
       <template v-slot:no-data>
@@ -139,7 +145,8 @@ export default {
             }
           ]
         },
-      ]
+      ],
+      databaseType: 0
     }
   },
   methods: {
