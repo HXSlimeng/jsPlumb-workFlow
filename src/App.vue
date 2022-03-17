@@ -1,9 +1,13 @@
 <template>
   <v-app>
-    <!-- <v-system-bar app>
-      <v-spacer></v-spacer>
-    </v-system-bar>-->
-    <v-app-bar app elevation="1" dense v-if="!$route.meta.hideNav" height="50px">
+    <v-app-bar
+      app
+      elevation="1"
+      dense
+      v-if="!$route.meta.hideNav"
+      height="50px"
+      :clipped-left="true"
+    >
       <v-img :src="fitowIcon" max-height="80" max-width="160"></v-img>
       <div class="text-h5 ml-4">AI大数据分析平台</div>
       <!-- <v-app-bar-title class="text-h5">绘制流程图</v-app-bar-title> -->
@@ -16,6 +20,8 @@
       :stateless="true"
       permanent
       expand-on-hover
+      style="z-index: 3;"
+      class="pt-13"
     >
       <!-- <v-avatar
           class="d-block text-center mx-auto mt-4"
@@ -41,7 +47,8 @@
     <v-main>
       <router-view>
         <template #breadcrumb>
-          <v-breadcrumbs :items="breadcrumbItem" large class="py-0"></v-breadcrumbs>
+          <div>{{ $route.name }}</div>
+          <!-- <v-breadcrumbs :items="breadcrumbItem" large class="py-0"></v-breadcrumbs> -->
         </template>
       </router-view>
     </v-main>
@@ -72,13 +79,11 @@ export default {
       text: '模型管理',
       disabled: false,
       to: '/manageModel',
-      exact: true
     },
     {
       text: '模型编辑',
       disabled: false,
       to: 'enterModel',
-      exact: true
     }
     ],
     selectedItem: '0'

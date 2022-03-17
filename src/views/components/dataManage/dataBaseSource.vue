@@ -59,7 +59,7 @@
           </div>
           <v-card-actions class="d-flex justify-center pb-7">
             <v-btn color="primary" class="mr-8">确定</v-btn>
-            <v-btn>取消</v-btn>
+            <v-btn @click="editSourceDialog = false">取消</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -76,9 +76,27 @@
           <v-btn color="primary" text @click="previewDBTable(item)">查看库表</v-btn>
           <v-btn color="primary" text>更新数据</v-btn>
           <v-btn color="primary" text>编辑</v-btn>
-          <v-btn color="primary" text>查看</v-btn>
+          <v-btn color="primary" text @click="lookupSource(item)">查看</v-btn>
           <v-btn color="primary" text @click="deleteItem(item)">删除</v-btn>
         </div>
+        <v-dialog
+          v-model="lookupSourceDialog"
+          scrollable
+          :overlay="false"
+          max-width="600px"
+          transition="dialog-transition"
+        >
+          <v-card>
+            <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">新建数据源</v-card-title>
+            <v-card-text class="pt-5">
+              <v-text-field solo dense label="数据源名称" v-model="value"></v-text-field>
+              <v-text-field solo dense label="描述" v-model="value"></v-text-field>
+              <v-text-field solo dense label="链接地址" v-model="value"></v-text-field>
+              <v-text-field solo dense label="用户名" v-model="value"></v-text-field>
+              <v-text-field solo dense label="密码" v-model="value"></v-text-field>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
       </template>
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialize">刷新</v-btn>
@@ -131,7 +149,10 @@ export default {
             },
             {
               name: 'SQL Server'
-            }
+            },
+            {
+              name: 'Oracle'
+            },
           ]
         },
         {
@@ -146,7 +167,8 @@ export default {
           ]
         },
       ],
-      databaseType: 0
+      databaseType: 0,
+      lookupSourceDialog: false
     }
   },
   methods: {
@@ -163,6 +185,10 @@ export default {
     previewDBTable(item) {
       console.log(item);
       this.$router.push('/previewDBTable');
+    },
+    lookupSource(item) {
+
+      this.lookupSourceDialog = true;
     }
   }
 }

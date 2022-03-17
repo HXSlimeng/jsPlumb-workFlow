@@ -79,8 +79,16 @@ const routes = [
 
   {
     path: '/buildCharts',
-    name: '可视化分析',
+    name: '创建可视化',
     component: () => import('../views/buildCharts/buildCharts'),
+    meta: {
+      menuList: false
+    }
+  },
+  {
+    path: '/manageVisualAna',
+    name: '可视化分析',
+    component: () => import('../views/manageVisualAna/manageVisualAna'),
     meta: {
       menuList: true,
       icon: '可视化分析'

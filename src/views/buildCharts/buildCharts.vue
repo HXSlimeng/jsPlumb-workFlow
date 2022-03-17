@@ -2,31 +2,53 @@
 <template>
   <div class="my_page">
     <v-card min-width="300" tile style="margin-right: -364px" class="leftNav">
-      <v-btn @click="logMessage">打印数据</v-btn>
-      <v-btn @click="loadCharts">回显数据</v-btn>
-      <v-btn @click="previewCharts">预览效果</v-btn>
-      <v-list>
-        <v-list-item-group v-model="selectedItem" color="primary">
-          <v-list-item
-            v-for="(item, i) in chartOptList"
-            :key="i"
-            draggable="true"
-            ref="dragItem"
-            @dragstart="currDragType = i"
-          >
-            <!-- <v-list-item-icon>
+      <div v-if="false">
+        <v-btn @click="logMessage">打印数据</v-btn>
+        <v-btn @click="loadCharts">回显数据</v-btn>
+        <v-btn @click="previewCharts">预览效果</v-btn>
+      </div>
+      <v-tabs color="primary" slider-color="primary">
+        <v-tab>组件</v-tab>
+        <v-tab>主题</v-tab>
+        <v-tab-item>
+          <v-card flat>
+            <v-list>
+              <v-list-item-group v-model="selectedItem" color="primary">
+                <v-list-item
+                  v-for="(item, i) in chartOptList"
+                  :key="i"
+                  draggable="true"
+                  ref="dragItem"
+                  @dragstart="currDragType = i"
+                >
+                  <!-- <v-list-item-icon>
               <v-icon v-text="item.icon"></v-icon>
-            </v-list-item-icon>-->
-            <v-list-item-content>
-              <v-list-item-title v-text="i"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
+                  </v-list-item-icon>-->
+                  <v-list-item-content>
+                    <v-list-item-title v-text="i"></v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group>
+            </v-list>
+          </v-card>
+        </v-tab-item>
+        <v-tab-item>
+          <v-card flat class="px-2">
+            <v-subheader>主题选择</v-subheader>
+            <v-select :items="themeItems" outlined dense v-model="themeSelcted"></v-select>
+            <v-subheader>画布尺寸</v-subheader>
+            <v-text-field suffix="px" dense outlined v-model="editAreaSize.w"></v-text-field>
+            <v-text-field suffix="px" dense outlined v-model="editAreaSize.h"></v-text-field>
+            <v-subheader>背景</v-subheader>
+            <v-color-picker dot-size="6" v-model="themeBgColor"></v-color-picker>
+          </v-card>
+        </v-tab-item>
+      </v-tabs>
     </v-card>
     <div>
       <div class="outBox">
         <div class="editArea" id="editMain" :style="getEditAreaMatrix1">
+          <!-- v-click-outside="chartsClickOutside" -->
           <vue-draggable-resizable
             v-for="item in draggableItems"
             :key="item.id"
@@ -112,13 +134,27 @@ export default {
         scaleY: 1,
         translateX: 0,
         translateY: 0
-      }
+      },
+      editAreaSize: {
+        w: 1920,
+        h: 1080
+      },
+      themeItems: ['浅色主题', '深色主题'],
+      themeSelcted: '浅色主题',
+      themeBgColor: '#ffffff'
     }
   },
   computed: {
     getEditAreaMatrix1() {
-      let { scaleX, sknewX, sknewY, scaleY, translateX, translateY } = this.editAreaMatrix
-      return `transform:matrix(${scaleX},${sknewX},${sknewY},${scaleY},${translateX},${translateY})`
+      let { scaleX, sknewX, sknewY, scaleY, translateX, translateY } = this.editAreaMatrix;
+      let { w, h } = this.editAreaSize;
+      let scaAndPos = `transform:matrix(${scaleX},${sknewX},${sknewY},${scaleY},${translateX},${translateY});`
+      let graphSize = `height:${h}px;width:${w}px;`
+      let bgColor = `background-color:${this.themeBgColor}`;
+      return scaAndPos + graphSize + bgColor;
+    },
+    includeClickOut() {
+      return document.querySelector('.chartItem')
     }
   },
   watch: {},
@@ -163,7 +199,6 @@ export default {
 
       let _this = this
       editBox.addEventListener('mousedown', function wrapMousedown(e) {
-        console.log(e.srcElement.id)
         if (!e.srcElement.id) {
           return
         }
@@ -260,6 +295,13 @@ export default {
         name: 'previewChartsTest'
       })
       window.open(href, '_blank', 'menubar=no,toolbar=no,status=no,scrollbars=false')
+    },
+    chartsClickOutside(e) {
+      if (e.target.parentNode.parentNode.className != 'insideCharts') {
+        this.draggableItems.forEach(element => {
+          element.active = false;
+        });
+      }
     }
   }
 }
@@ -275,6 +317,8 @@ export default {
 .my_page {
   display: flex;
   .leftNav {
+    overflow-x: auto;
+    height: calc(100vh - 50px);
     position: relative;
     z-index: 2;
   }
@@ -291,8 +335,9 @@ export default {
 
   .editArea {
     // width: 200vw;
-    width: @editWidth;
-    height: @editheight;
+    // width: @editWidth;
+    // height: @editheight;
+    overflow: hidden;
     transform-origin: left top;
     border: solid gray 5px;
     position: relative;

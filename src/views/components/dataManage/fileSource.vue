@@ -63,7 +63,7 @@
         </v-card>
       </v-dialog>
       <v-btn outlined color="error" class="ml-2">批量删除</v-btn>
-      <v-dialog v-model="editSourceDialog" max-width="400px">
+      <v-dialog v-model="editSourceDialog" max-width="600px">
         <v-card>
           <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">上传文件</v-card-title>
           <div class="inputArea pa-3">

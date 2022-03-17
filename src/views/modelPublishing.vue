@@ -1,10 +1,6 @@
 <template>
   <div>
-    <v-card
-      class="text-h5 d-flex justify-space-between align-center pl-6"
-      height="50"
-      style="width: 100%"
-    >
+    <v-card class="d-flex justify-space-between align-center pl-6" height="50" style="width: 100%">
       数据ETL发布
       <div>
         <v-btn>查看已发布</v-btn>

@@ -31,7 +31,7 @@
             </v-btn>
           </template>
           <v-card>
-            <v-card-title class="text-h6 grey lighten-2">新建数据ETL</v-card-title>
+            <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">新建数据ETL</v-card-title>
             <div class="mx-3">
               <v-text-field :rules="createModelRules" label="模型名称" v-model="newModelName"></v-text-field>
               <v-text-field label="描述" v-model="newModelMessage"></v-text-field>

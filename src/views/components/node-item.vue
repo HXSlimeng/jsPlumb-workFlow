@@ -6,6 +6,7 @@
       isActive || isSelected ? 'active' : '',
       { nodedisab: nodeParams.disabled },
       { lastNode: nodeParams.last },
+      'px-3'
     ]"
     :style="flowNodeContainer"
     v-click-outside="setNotActive"
@@ -20,21 +21,10 @@
 
     <!-- <v-btn fab dark x-small color="primary" @click.stop="formInfoShow = true" v-if="nodeParams.submit" class="configParamBtn">
       <v-icon dark>mdi-file-document-edit-outline</v-icon>
-    </v-btn> -->
+    </v-btn>-->
     <!-- 记录node节点的状态 -->
-    <v-icon v-if="nodeStatus == 3" dark color="red">mdi-alert-circle</v-icon>
-    <v-icon
-      v-else-if="nodeStatus != 2"
-      dark
-      :color="nodeStatus == '0' ? 'warning' : 'success'"
-      >{{ statusIcon[nodeStatus] }}</v-icon
-    >
-    <v-progress-circular
-      v-else
-      indeterminate
-      color="primary"
-      size="24"
-    ></v-progress-circular>
+    <v-progress-circular v-if="nodeStatus == 2" indeterminate style="color:currentColor" size="24"></v-progress-circular>
+    <v-icon v-else dark style="color:currentColor">{{ statusIcon[nodeStatus] }}</v-icon>
     <!--连线用--//触发连线的区域-->
     <div class="node-anchor anchor-top" v-show="ifShownodeAnchor"></div>
     <div class="node-anchor anchor-right" v-show="ifShownodeAnchor"></div>
@@ -48,7 +38,7 @@
       :no-click-animation="true"
     >
       <v-card>
-        <v-card-title class="text-h6 grey lighten-2"> 配置参数 </v-card-title>
+        <v-card-title class="text-h6 grey lighten-2">配置参数</v-card-title>
         <v-form ref="form" lazy-validation class="ma-3">
           <span class="text-h6">train_params</span>
           <v-divider class="my-3"></v-divider>
@@ -101,15 +91,14 @@
             @click="connectToDatabase"
             :loading="dataBaseFetching"
             :disabled="nodeParams.submit_result"
-            >计算数据</v-btn
-          >
+          >计算数据</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
     <!-- 展示详情 -->
     <v-dialog v-model="showDetialMess" max-width="600">
       <v-card min-height="600">
-        <v-card-title class="text-h6 grey lighten-2"> 查看输出 </v-card-title>
+        <v-card-title class="text-h6 grey lighten-2">查看输出</v-card-title>
         <div v-if="node.node_result">
           <v-data-table
             :headers="headers"
@@ -119,23 +108,16 @@
           >
             <template #item="{ item }">
               <tr>
-                <td v-for="(chdItem, index) in item" :key="index">
-                  {{ item[index] }}
-                </td>
+                <td v-for="(chdItem, index) in item" :key="index">{{ item[index] }}</td>
               </tr>
             </template>
           </v-data-table>
         </div>
       </v-card>
     </v-dialog>
-    <v-tooltip
-      top
-      color="warning"
-      :activator="getNode()"
-      v-if="nodeParams.disabled"
-    >
-      <v-icon color="white" size="18px">mdi-alert-circle</v-icon
-      ><span>请先配置参数</span>
+    <v-tooltip top color="warning" :activator="getNode()" v-if="nodeParams.disabled">
+      <v-icon color="white" size="18px">mdi-alert-circle</v-icon>
+      <span>请先配置参数</span>
     </v-tooltip>
   </div>
 </template>
@@ -159,6 +141,7 @@ export default {
         return {
           top: this.node.node_params.top,
           left: this.node.node_params.left,
+          ...this.nodeStatusStyle[this.nodeStatus]
         };
       },
     },
@@ -221,7 +204,19 @@ export default {
         { text: "第五项", value: "five" },
       ],
       nodeStatus: 0,
-      statusIcon: ["mdi-help-circle", "mdi-check-circle"],
+      statusIcon: ["mdi-pencil-circle", "mdi-check-circle", "", "mdi-alert-circle"],
+      nodeStatusStyle: [
+        {},
+        {
+          color: '#009D89',
+          backgroundColor: 'rgba(0, 157, 137, 0.2)'
+        },
+        {},
+        {
+          color: '#E5752E',
+          backgroundColor: '#FBEDB3'
+        }
+      ]
     };
   },
   methods: {
@@ -435,7 +430,7 @@ export default {
       return this.$parent.getNameByNodeType(type);
     },
   },
-  mounted() {},
+  mounted() { },
   created() {
     /* if (this.nodeParams.submit && !this.node.node_result) {
       this.nodeParams.disabled = true;
@@ -459,15 +454,25 @@ export default {
   display: flex;
   height: 40px;
   width: 160px;
+  color: #0052d9;
   justify-content: center;
   align-items: center;
-  border: 1px solid #b7b6b6;
-  border-left: solid 10px rgb(145, 170, 157);
+  // border: 1px solid #b7b6b6;
   border-radius: 4px;
   cursor: move;
   box-sizing: content-box;
   z-index: 9995;
-  background-color: rgb(209, 219, 189);
+  background-color: rgba(0, 82, 217, 0.3);
+  &::after {
+    content: "";
+    width: 184px;
+    height: 4px;
+    position: absolute;
+    bottom: 0px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background-color: currentColor;
+  }
   &:hover {
     z-index: 9998;
     .delete-btn {
@@ -518,14 +523,14 @@ export default {
   }
   .anchor-left {
     top: 50%;
-    left: calc((@nodeSize / 0.9) * -1);
+    left: calc((@nodeSize / 2) * -1);
     margin-top: calc((@nodeSize / 2) * -1);
   }
 }
 .active {
   /* border: 1px dashed @labelColor; */
   box-shadow: 0px 5px 9px 0px rgba(0, 0, 0, 0.5);
-  border-left: solid 10px rgb(145, 170, 157);
+  // border-left: solid 10px rgb(145, 170, 157);
 }
 .nodedisab {
   background: rgba(209, 219, 189, 0.4);

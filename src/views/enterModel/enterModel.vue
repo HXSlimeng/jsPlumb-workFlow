@@ -1,8 +1,8 @@
 <template>
   <div>
     <!-- Page Header -->
-    <v-card class="editToolbar d-flex align-center justify-end" elevation>
-      <v-card-title class="text-h5 pl-6" style="position: absolute; left: 0">
+    <v-card class="editToolbar d-flex align-center justify-end my-1" elevation="0">
+      <v-card-title style="position: absolute; left: 0">
         <slot name="breadcrumb"></slot>
       </v-card-title>
       <div class="mainCtrl mr-10">
@@ -132,20 +132,18 @@
         absolute
         right
         :stateless="true"
-        width="600"
+        width="490px"
         :expand-on-hover="false"
-        class="pt-16 rightOverlay"
+        class="pt-14 rightOverlay"
       >
         <template v-slot:prepend>
-          <v-list-item two-line>
-            <v-list-item-avatar color="#D1DBBD">
-              <v-icon>mdi-pencil</v-icon>
-            </v-list-item-avatar>
+          <v-list-item>
             <v-list-item-content>
-              <v-list-item-title
-                class="text-h4"
-              >{{ getNameByNodeType(rightOverlay.info.node_params.node_type) }}</v-list-item-title>
-              <!-- <v-list-item-subtitle>副标题</v-list-item-subtitle> -->
+              <v-list-item-title class="text-body-1">
+                <div
+                  class="titleComp"
+                >{{ getNameByNodeType(rightOverlay.info.node_params.node_type) }}</div>
+              </v-list-item-title>
             </v-list-item-content>
             <div class="d-flex justify-center align-center">
               <v-btn @click="rightOverlay.active = false" color="error">关闭</v-btn>
@@ -738,7 +736,7 @@ export default {
   width: 400px;
 }
 .editToolbar {
-  height: 50px;
+  height: 40px;
   z-index: 2;
   .mainCtrl {
     height: 100%;
