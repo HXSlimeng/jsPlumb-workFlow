@@ -12,7 +12,7 @@
         <v-btn color="primary" outlined>发布</v-btn>
         <v-btn color="primary" outlined disabled>导出</v-btn>
       </div>
-      <div class="d-flex">
+      <div class="d-flex align-center">
         <v-text-field
           style="min-width: 320px;"
           outlined
@@ -27,7 +27,7 @@
         <v-dialog v-model="addModelDialog" width="500">
           <template #activator="{ on, attrs }">
             <v-btn color="teal darken-1" dark v-bind="attrs" v-on="on">
-              <v-icon>mdi-plus</v-icon>新建ETL
+              <v-icon left>mdi-plus</v-icon>新建ETL
             </v-btn>
           </template>
           <v-card>
@@ -47,7 +47,8 @@
           </v-card>
         </v-dialog>
         <v-btn outlined color="error">批量删除</v-btn>
-        <v-btn outlined>刷新</v-btn>
+        <v-btn outlined>
+          <v-icon left>mdi-refresh</v-icon>  刷新</v-btn>
       </div>
     </div>
 
@@ -156,7 +157,7 @@ export default {
   height: 84vh;
 }
 .topBar {
-  // min-height: 48px;
+  min-height: 52px;
   button {
     margin-left: 10px;
   }

@@ -18,21 +18,11 @@
           <div class="name">{{item.typeName}}</div>
       </div>-->
       <!-- Left Aside -->
-      <v-navigation-drawer
-        v-model="leftBarVis"
-        :absolute="false"
-        :hide-overlay="true"
-        :stateless="true"
-      >
+      <v-navigation-drawer v-model="leftBarVis" :absolute="false" :hide-overlay="true" :stateless="true">
         <v-list nav dense>
-          <v-list-group
-            v-for="item in listItem"
-            :key="item.node_type"
-            v-model="item.active"
-            no-action
-          >
+          <v-list-group v-for="item in listItem" :key="item.node_type" v-model="item.active" no-action>
             <template #prependIcon>
-              <v-icon color="#0D47A1">{{ item.active ? "mdi-database-settings" : "mdi-database" }}</v-icon>
+              <v-icon color="#0D47A1">{{ item.active ? 'mdi-database-settings' : 'mdi-database' }}</v-icon>
             </template>
             <template #activator>
               <v-list-item-content>
@@ -59,24 +49,14 @@
         </v-list>
       </v-navigation-drawer>
 
-      <div
-        id="flowWrap"
-        ref="flowWrap"
-        class="flow-wrap"
-        @drop="drop($event)"
-        @dragover="allowDrop($event)"
-      >
+      <div id="flowWrap" ref="flowWrap" class="flow-wrap" @drop="drop($event)" @dragover="allowDrop($event)">
         <div class="graphEditTool d-flex justify-space-between align-center elevation-1">
           <div class="text-h5 ml-2" style="color: #00695c;">{{ data.graph_param.graph_name }}</div>
           <v-btn-toggle class="mr-2">
             <v-btn>撤销</v-btn>
             <v-btn>还原</v-btn>
-            <v-btn @click="goSaveGraph">
-              <v-icon dark color="blue" class>mdi-download-box</v-icon>保存
-            </v-btn>
-            <v-btn @click="runAllGraph">
-              <v-icon dark color="blue" class>mdi-play-box</v-icon>执行
-            </v-btn>
+            <v-btn @click="goSaveGraph"> <v-icon dark color="blue" class>mdi-download-box</v-icon>保存 </v-btn>
+            <v-btn @click="runAllGraph"> <v-icon dark color="blue" class>mdi-play-box</v-icon>执行 </v-btn>
           </v-btn-toggle>
         </div>
         <div id="flow">
@@ -86,7 +66,7 @@
             :style="{
               width: auxiliaryLinePos.width,
               top: auxiliaryLinePos.y + 'px',
-              left: auxiliaryLinePos.offsetX + 'px',
+              left: auxiliaryLinePos.offsetX + 'px'
             }"
           ></div>
           <div
@@ -95,7 +75,7 @@
             :style="{
               height: auxiliaryLinePos.height,
               left: auxiliaryLinePos.x + 'px',
-              top: auxiliaryLinePos.offsetY + 'px',
+              top: auxiliaryLinePos.offsetY + 'px'
             }"
           ></div>
           <v-dialog v-model="showDelDialog">
@@ -140,22 +120,14 @@
           <v-list-item>
             <v-list-item-content>
               <v-list-item-title class="text-body-1">
-                <div
-                  class="titleComp"
-                >{{ getNameByNodeType(rightOverlay.info.node_params.node_type) }}</div>
+                <div class="titleComp">{{ getNameByNodeType(rightOverlay.info.node_params.node_type) }}</div>
               </v-list-item-title>
             </v-list-item-content>
             <div class="d-flex justify-center align-center">
               <v-btn @click="rightOverlay.active = false" color="error">关闭</v-btn>
               <div class="editBtn" v-if="false">
                 <v-btn @click="reloadData(null)" color="success" class="mx-5">回显数据</v-btn>
-                <v-file-input
-                  hide-input
-                  truncate-length="25"
-                  @change="loadFile"
-                  accept="application/json"
-                  class="mx-5"
-                ></v-file-input>
+                <v-file-input hide-input truncate-length="25" @change="loadFile" accept="application/json" class="mx-5"></v-file-input>
               </div>
             </div>
           </v-list-item>
@@ -182,10 +154,7 @@
                     <div class="text-h6 rOverlayTit">帮助信息:</div>
                   </template>
                 </v-text-field>
-                <v-switch
-                  v-model="rightOverlay.info.train_params.submit_result"
-                  label="节点是否返回节点计算结果"
-                ></v-switch>
+                <v-switch v-model="rightOverlay.info.train_params.submit_result" label="节点是否返回节点计算结果"></v-switch>
                 <v-text-field
                   v-if="rightOverlay.info.node_result"
                   v-model="rightOverlay.info.node_result.addtional_node_info"
@@ -202,10 +171,7 @@
                     <v-expansion-panel-header color="#daeaf6">train_params</v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <v-list>
-                        <v-list-item
-                          v-for="(v, index) in rightOverlay.info.train_params"
-                          :key="index"
-                        >
+                        <v-list-item v-for="(v, index) in rightOverlay.info.train_params" :key="index">
                           <v-list-item-content>{{ index }}:</v-list-item-content>
                           <v-list-item-content>{{ v }}</v-list-item-content>
                         </v-list-item>
@@ -227,11 +193,7 @@
                     <v-expansion-panel-header color="#daeaf6">resource_params</v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <v-list>
-                        <v-list-item
-                          v-for="(v, index) in rightOverlay.info
-                          .resource_params"
-                          :key="index"
-                        >
+                        <v-list-item v-for="(v, index) in rightOverlay.info.resource_params" :key="index">
                           <v-list-item-content>{{ index }}:</v-list-item-content>
                           <v-list-item-content>{{ v }}</v-list-item-content>
                         </v-list-item>
@@ -242,11 +204,7 @@
                     <v-expansion-panel-header color="#daeaf6">addtional_node_info</v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <v-list v-if="rightOverlay.info.node_result">
-                        <v-list-item
-                          v-for="(v, index) in rightOverlay.info.node_result
-                          .addtional_node_info"
-                          :key="index"
-                        >
+                        <v-list-item v-for="(v, index) in rightOverlay.info.node_result.addtional_node_info" :key="index">
                           <v-list-item-content>{{ index }}:</v-list-item-content>
                           <v-list-item-content>{{ v }}</v-list-item-content>
                         </v-list-item>
@@ -261,9 +219,7 @@
                       <v-expansion-panels :accordion="true">
                         <v-expansion-panel>
                           <v-expansion-panel-header color="#daeaf6">
-                            {{
-                              index
-                            }}
+                            {{ index }}
                           </v-expansion-panel-header>
                           <v-expansion-panel-content>
                             <v-list>
@@ -288,11 +244,7 @@
               <v-tab-item>
                 <v-data-table
                   :headers="headers"
-                  :items="
-                    rightOverlay.info.node_result
-                      ? rightOverlay.info.node_result.X
-                      : []
-                  "
+                  :items="rightOverlay.info.node_result ? rightOverlay.info.node_result.X : []"
                   :items-per-page="10"
                   class="elevation-1"
                 >
@@ -574,6 +526,7 @@ export default {
     this.listMap = new Map(this.listTypeMap)
 
     this.jsPlumb = jsPlumb.getInstance()
+    console.log(this.$route)
     let modelInfo = this.$route.params.modelInfo
     if (modelInfo) {
       this.reloadData(modelInfo)
@@ -585,6 +538,7 @@ export default {
   },
   mounted() {
     // this.initNodeTypeObj()
+    console.log(this.$route)
     this.initNode()
     this.fixNodesPosition()
     this.$nextTick(() => {
@@ -647,7 +601,7 @@ export default {
       let _this = this
       let readFile = new FileReader()
       readFile.readAsText(e, 'utf8')
-      readFile.onload = function () {
+      readFile.onload = function() {
         _this.reloadData(JSON.parse(this.result))
       }
     },

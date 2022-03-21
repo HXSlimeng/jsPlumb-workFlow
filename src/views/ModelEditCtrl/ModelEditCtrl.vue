@@ -12,7 +12,7 @@
       <div>
         <slot name="breadcrumb"></slot>
       </div>
-      <div class="d-flex">
+      <div class="d-flex align-center">
         <v-text-field
           style="min-width: 320px;"
           outlined
@@ -26,9 +26,7 @@
         ></v-text-field>
         <v-dialog v-model="addModelDialog" width="500">
           <template #activator="{ on, attrs }">
-            <v-btn color="teal darken-1" dark v-bind="attrs" v-on="on">
-              <v-icon>mdi-plus</v-icon>创建流程图
-            </v-btn>
+            <v-btn color="teal darken-1" dark v-bind="attrs" v-on="on"> <v-icon>mdi-plus</v-icon>创建流程图 </v-btn>
           </template>
           <v-card>
             <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">创建流程图</v-card-title>
@@ -111,7 +109,7 @@
         <template #item.actions="{ item }">
           <div class="d-flex editBtns">
             <v-btn @click="enterViewModel(item, 'MODEL')" color="teal darken-1" dark>模型编辑</v-btn>
-            <v-btn @click="enterViewModel(item), 'MODEL'" color="teal darken-1" dark>模型查看</v-btn>
+            <v-btn @click="enterViewModel(item, 'MODEL')" color="teal darken-1" dark>模型查看</v-btn>
             <v-btn fab x-small dark color="success" @click="editItem(item)">
               <v-icon small>mdi-pencil</v-icon>
             </v-btn>
@@ -144,10 +142,10 @@
 </template>
 
 <script>
-import datalist from "../config/data.json";
-import { GenNonDuplicateID } from "@/common/until.js";
-import { searchGraph, editGraph } from "@/request/apis/drawApi.js";
-import editModelMixin from "@/mixins/editModel.js";
+import datalist from '../config/data.json'
+import { GenNonDuplicateID } from '@/common/until.js'
+import { searchGraph, editGraph } from '@/request/apis/drawApi.js'
+import editModelMixin from '@/mixins/editModel.js'
 
 export default {
   mixins: [editModelMixin],
@@ -160,111 +158,108 @@ export default {
       singleSelect: false,
       modelHeaders: [
         {
-          text: "模型名称",
-          align: "start",
-          value: "model_name",
+          text: '模型名称',
+          align: 'start',
+          value: 'model_name'
         },
-        { text: "描述", value: "graph_param.graph_message" },
-        { text: "创建时间", value: "time_str" },
-        { text: "操作", value: "actions" },
+        { text: '描述', value: 'graph_param.graph_message' },
+        { text: '创建时间', value: 'time_str' },
+        { text: '操作', value: 'actions' }
       ],
       desserts: [],
       editedIndex: -1,
       editedItem: {
         graph_param: {
-          graph_name: "",
-          graph_id: "",
-          graph_message: "",
-          graph_createTime: "",
-          graph_type: "",
-        },
+          graph_name: '',
+          graph_id: '',
+          graph_message: '',
+          graph_createTime: '',
+          graph_type: ''
+        }
       },
       dialogDelete: false,
       editDialog: false,
       defaultItem: {
         graph_param: {
-          graph_name: "",
-          graph_id: "",
-          graph_message: "",
-          graph_createTime: "",
-          graph_type: "",
-        },
+          graph_name: '',
+          graph_id: '',
+          graph_message: '',
+          graph_createTime: '',
+          graph_type: ''
+        }
       },
       dataLifetching: false,
-      searchVal: '',
-
-    };
+      searchVal: ''
+    }
   },
   methods: {
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.editDialog = true;
+      this.editedIndex = this.desserts.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.editDialog = true
     },
     batchDelete() {
-      let selectedArr = this.selected;
+      let selectedArr = this.selected
     },
     close() {
-      this.editDialog = false;
+      this.editDialog = false
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      })
     },
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
-      this.closeDelete();
+      this.desserts.splice(this.editedIndex, 1)
+      this.closeDelete()
     },
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+      this.editedIndex = this.desserts.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.dialogDelete = true
     },
     closeDelete() {
-      this.dialogDelete = false;
+      this.dialogDelete = false
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      })
     },
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        Object.assign(this.desserts[this.editedIndex], this.editedItem)
       } else {
-        this.desserts.push(this.editedItem);
+        this.desserts.push(this.editedItem)
       }
-      this.close();
+      this.close()
     },
     fetchModelList() {
-      this.dataLifetching = true;
+      this.dataLifetching = true
       searchGraph()
-        .then((res) => {
-          if (res.save_state == "success") {
-            this.desserts = res.models;
-            this.dataLifetching = false;
+        .then(res => {
+          if (res.save_state == 'success') {
+            this.desserts = res.models
+            this.dataLifetching = false
           } else {
-            this.$message.alertMessage(res.failed_info);
-            this.dataLifetching = false;
+            this.$message.alertMessage(res.failed_info)
+            this.dataLifetching = false
           }
         })
-        .catch((err) => {
-          console.log(err);
-          this.dataLifetching = false;
-        });
+        .catch(err => {
+          console.log(err)
+          this.dataLifetching = false
+        })
     },
-    search() {
-
-    }
+    search() {}
   },
   created() {
-    // this.fetchModelList();
-  },
-};
+    this.fetchModelList()
+  }
+}
 </script>
 
 <style lang="less" scoped>
 .topBar {
-  // min-height: 48px;
+  min-height: 52px;
   button {
     margin-left: 10px;
   }

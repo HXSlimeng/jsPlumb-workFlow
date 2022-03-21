@@ -3,7 +3,7 @@
     <div class="editBox editBox d-flex justify-end align-center">
       <v-dialog v-model="editSourceDialog" max-width="400px">
         <template v-slot:activator="{ on, attrs }">
-          <v-btn color="primary" dark v-bind="attrs" v-on="on">新建数据表</v-btn>
+          <v-btn color="primary" dark v-bind="attrs" v-on="on">新建数据源</v-btn>
         </template>
         <v-card>
           <v-card-title class="blue-grey lighten-5">新建接口数据源</v-card-title>

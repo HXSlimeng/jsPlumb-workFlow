@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <div class="editBox d-flex justify-end align-center">
+    <div class="editBox d-flex justify-end align-center my-1">
       <v-text-field
         outlined
         dense
@@ -13,7 +13,7 @@
       ></v-text-field>
       <v-dialog v-model="selectSourceDialog" max-width="1021px">
         <template v-slot:activator="{ on, attrs }">
-          <v-btn color="primary" dark v-bind="attrs" v-on="on" class="ml-2">新建数据表</v-btn>
+          <v-btn color="primary" dark v-bind="attrs" v-on="on" class="ml-2"> <v-icon left>mdi-plus</v-icon> 新建数据源</v-btn>
         </template>
         <v-card>
           <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">新建数据源</v-card-title>
@@ -28,12 +28,12 @@
                     <v-col cols="2" v-for="source in item.dataList" :key="source.name">
                       <v-hover v-slot="{ hover }">
                         <v-card
-                          class="dataBaseItem"
+                          class="dataBaseItem d-flex flex-column justify-center align-center py-3"
                           :elevation="hover ? 5 : 2"
                           @click="dataBaseItem(source)"
                         >
-                          <div style="height: 80px;"></div>
-                          <span>{{ source.name }}</span>
+                        <svg-icon :icon-class="source.name == '其他' ? 'OtherDatabase' : source.name" className="databaseSource"></svg-icon>
+                          <span class="pt-2">{{ source.name }}</span>
                         </v-card>
                       </v-hover>
                     </v-col>
@@ -49,7 +49,7 @@
         <v-card>
           <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">新建数据源</v-card-title>
           <div class="inputArea pa-3 d-flex-column">
-            <v-text-field class="inputItem" outlined dense label="数据源名称"></v-text-field>
+            <v-text-field class="inputItem" outlined dense label="数据源名称" hint="数据源名称可输入英文大小写/中文/数字/下划线，最多输入30个字符"></v-text-field>
             <v-text-field class="inputItem" outlined dense label="描述"></v-text-field>
             <v-text-field class="inputItem" outlined dense label="驱动类型"></v-text-field>
             <v-text-field class="inputItem" outlined dense label="链接地址"></v-text-field>
@@ -107,8 +107,10 @@
 
 <script>
 import methods from "../../config/methods"
+import SvgIcon from '../svgComp/SvgIcon.vue';
 
 export default {
+  components: { SvgIcon },
   data() {
     return {
       dbHeaders: [
@@ -145,24 +147,60 @@ export default {
           title: '关系型数据库',
           dataList: [
             {
-              name: 'MySql'
+              name: 'MySQL',
             },
             {
-              name: 'SQL Server'
+              name: 'DB2'
             },
             {
-              name: 'Oracle'
+              name: 'Sybase'
             },
+            {
+              name: 'Informix'
+            },
+          ]
+        },
+        {
+          title: '大数据数据库',
+          dataList: [
+            {
+              name: 'Hive'
+            },
+            {
+              name: 'MaxCompute'
+            },
+            {
+              name: 'Spak SQL'
+            },
+          ]
+        },
+        {
+          title: 'MPP数据库',
+          dataList: [
+            {
+              name: 'GreenPlum'
+            },
+            {
+              name: 'Vertica'
+            }
           ]
         },
         {
           title: '国产数据库',
           dataList: [
             {
-              name: 'xxxxx'
+              name: '达梦V7'
             },
             {
-              name: 'xxxxxx'
+              name: '高斯200'
+            },
+          ]
+        },
+        {
+          title: '其他',
+          dataList: [
+            {
+              name: '其他'
             }
           ]
         },
@@ -196,4 +234,11 @@ export default {
 
 <style lang="less" scoped>
 @import url("./datamanage.less");
+.databaseSource{
+  height: 60px;
+  width: 60px;
+}
+.topBar{
+  height: 52px !important;
+}
 </style>

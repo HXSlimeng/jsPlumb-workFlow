@@ -33,7 +33,7 @@ const routes = [
   },
   {
     path: '/enterModel',
-    name: '模型编辑',
+    name: 'enterModel',
     component: EnterModel,
     meta: {
       menuList: false,

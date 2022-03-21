@@ -3,31 +3,35 @@ const chartsMethods = {
   onResize: debounce(function(x, y, width, height) {
     let activeItem = this.draggableItems.find(v => v.active)
     let init = this.initEcharts.find(v => v.id == activeItem.id)
-    init.init.resize()
     activeItem.x = x
     activeItem.y = y
     activeItem.width = width
     activeItem.height = height
+    init.init.resize()
+    this.$refs[activeItem.id][0].initWH()
+    /* this.$nextTick(() => {
+      activeItem.flag = activeItem.flag.length == 14 ? activeItem.flag + '1' : activeItem.flag.slice(0, 14)
+    }) */
   }, 100),
   onDrag: function(x, y) {
     let activeItem = this.draggableItems.find(v => v.active)
     activeItem.x = x
     activeItem.y = y
   },
-  setActive(item) {
-    let activeItem = this.draggableItems.find(v => v.active)
-    if (activeItem) {
-      activeItem.active = false
-    }
-    let toActiveItem = this.draggableItems.find(v => v.id == item.id)
-    toActiveItem.active = true
+  setActive(dragItem) {
+    this.currentEditItem = dragItem
+    dragItem.active = true
+  },
+  onDeactivated(dragItem) {
+    dragItem.active = false
   },
   createCharts(targetId, targetOption) {
     this.$nextTick(() => {
       let targetDom = document.getElementById(targetId)
       let ChartInit = this.$echarts.init(targetDom)
+      this.initEcharts = this.initEcharts.filter(v => v.id != targetId)
       this.initEcharts.push({ id: targetId, init: ChartInit })
-      console.log(targetOption)
+      console.log(this.initEcharts)
       ChartInit.setOption(targetOption)
     })
   },
@@ -150,6 +154,7 @@ const chartsMethods = {
         }
       }
     ]
+    console.log(this.draggableItems)
     this.draggableItems.forEach(v => {
       v.draggable = false
       v.resizable = false

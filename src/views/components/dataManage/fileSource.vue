@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <div class="editBox d-flex justify-end align-center">
+    <div class="editBox d-flex justify-end align-center my-1">
       <v-text-field
         outlined
         dense
@@ -48,12 +48,12 @@
                 <v-col cols="3" v-for="source in item.dataList" :key="source.name">
                   <v-hover v-slot="{ hover }">
                     <v-card
-                      class="dataBaseItem"
+                      class="dataBaseItem d-flex flex-column justify-center align-center py-3"
                       :elevation="hover ? 12 : 2"
                       @click="fileSourceItem(source)"
                     >
-                      <div style="height: 80px;"></div>
-                      <span>{{ source.name }}</span>
+                      <svg-icon :icon-class="source.icon" className="databaseSource"></svg-icon>
+                      <span class="pt-2">{{ source.name }}</span>
                     </v-card>
                   </v-hover>
                 </v-col>
@@ -71,18 +71,8 @@
             <v-text-field class="inputItem" outlined dense label="描述"></v-text-field>
             <v-file-input prepend-icon="mdi-plus" :accept="acceptFileType">
               <template v-slot:selection="{ index, text }">
-                <v-chip
-                  v-if="index < 2"
-                  color="deep-purple accent-4"
-                  dark
-                  label
-                  small
-                  v-model="fileSelected"
-                >{{ text }}</v-chip>
-                <span
-                  v-else-if="index === 2"
-                  class="text-overline grey--text text--darken-3 mx-2"
-                >+{{ files.length - 2 }} File(s)</span>
+                <v-chip v-if="index < 2" color="deep-purple accent-4" dark label small v-model="fileSelected">{{ text }}</v-chip>
+                <span v-else-if="index === 2" class="text-overline grey--text text--darken-3 mx-2">+{{ files.length - 2 }} File(s)</span>
               </template>
             </v-file-input>
           </div>
@@ -110,7 +100,7 @@
 </template>
 
 <script>
-import methods from "../../config/methods"
+import methods from '../../config/methods'
 
 export default {
   data() {
@@ -147,34 +137,40 @@ export default {
       searchVal: '',
       selectSourceDialog: false,
       acceptFileType: null,
-      typeOfDataBase: [{
-        title: '文件类型',
-        dataList: [
-          {
-            name: 'EXCEL类型文件',
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
-          },
-          {
-            name: 'TXT类型文件',
-            type: 'text/plain'
-          },
-          {
-            name: 'CSV类型文件',
-            type: '.csv'
-          },
-          {
-            name: 'DB类型文件',
-            type: '.db'
-          },
-        ]
-      }],
+      typeOfDataBase: [
+        {
+          title: '文件类型',
+          dataList: [
+            {
+              name: 'EXCEL类型文件',
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel',
+              icon: 'EXCEL文件'
+            },
+            {
+              name: 'TXT类型文件',
+              type: 'text/plain',
+              icon: 'TXT文件'
+            },
+            {
+              name: 'CSV类型文件',
+              type: '.csv',
+              icon: 'CSV'
+            },
+            {
+              name: 'DB类型文件',
+              type: '.db',
+              icon: 'DB'
+            }
+          ]
+        }
+      ],
       fileSelected: null,
       editSourceDialog: false
     }
   },
   methods: {
     search() {
-      console.log(111);
+      console.log(111)
     },
     fileSourceItem(source) {
       this.selectSourceDialog = false
@@ -186,5 +182,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
-@import url("./datamanage.less");
+@import url('./datamanage.less');
+.databaseSource {
+  height: 60px;
+  width: 60px;
+}
 </style>

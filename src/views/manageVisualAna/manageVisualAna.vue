@@ -257,7 +257,7 @@ export default {
 
 <style lang="less" scoped>
 .topBar {
-    // min-height: 48px;
+    min-height: 52px;
     button {
         margin-left: 10px;
     }

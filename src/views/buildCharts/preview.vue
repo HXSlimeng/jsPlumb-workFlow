@@ -1,6 +1,6 @@
 <template>
   <div class="outBox">
-    <div class="editArea" id="topOuter">
+    <div class="editArea" id="topOuter" :style="globalStyleStr">
       <vue-draggable-resizable
         v-for="item in draggableItems"
         :key="item.id"
@@ -16,7 +16,10 @@
         :draggable="false"
         :resizable="false"
       >
-        <div :id="item.id" class="insideCharts"></div>
+        <component :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id">
+          <div :id="item.id" class="insideCharts"></div>
+        </component>
+
         <!-- <p>
               X: {{ item.x }} / Y: {{ item.y }} - Width: {{ item.width }} /
               Height: {{ item.height }}
@@ -27,18 +30,22 @@
 </template>
 
 <script>
-import preMethods from "./presetCharts";
-import { debounce } from "@/common/until.js";
+import preMethods from './presetCharts'
+import { debounce } from '@/common/until.js'
 export default {
   data() {
     return {
       draggableItems: [],
       initEcharts: [],
       timer: null,
-    };
+      globalSetting: {},
+      globalStyleStr: ''
+    }
   },
   created() {
-    this.draggableItems = JSON.parse(window.localStorage.getItem("chartsItem"));
+    const { dragItems, globalSetting } = JSON.parse(window.localStorage.getItem('chartsItem'))
+    this.draggableItems = dragItems
+    this.globalSetting = globalSetting
     // const { dragCharts } = this.$route.params;
     // this.draggableItems = dragCharts;
   },
@@ -159,39 +166,45 @@ export default {
       //     },
       //   },
       // ];
-      this.draggableItems.forEach((v) => {
-        v.draggable = false;
-        v.resizable = false;
-        this.createCharts(v.id, v.option);
-      });
+      this.draggableItems.forEach(v => {
+        v.draggable = false
+        v.resizable = false
+        this.createCharts(v.id, v.option)
+      })
     },
     resizeScale(id) {
-      this.setScale(id);
-      let _this = this;
+      this.setScale(id)
+      let _this = this
       window.addEventListener(
-        "resize",
-        function () {
-          _this.setScale(id);
+        'resize',
+        function() {
+          _this.setScale(id)
         },
         false
-      );
+      )
     },
-    setScale: debounce(function (id) {
-      var dom = document.getElementById(id);
-      let domW = dom.clientWidth;
-      let domH = dom.clientHeight;
+    setEditStyle() {
+      const { themeBgColor, themeBgImage, bgModeSelc, editAreaSize } = this.globalSetting
+      const { w, h } = editAreaSize
+      this.globalStyleStr = `height:${h}px;width:${w}px;background:${bgModeSelc == 'color' ? themeBgColor : 'url(' + themeBgImage + ');'}`
+    },
+    setScale: debounce(function(id) {
+      var dom = document.getElementById(id)
+      let domW = dom.clientWidth
+      let domH = dom.clientHeight
       var winW = window.innerWidth,
         winH = window.innerHeight,
         scaleX = winW / domW,
-        scaleY = winH / domH;
-      dom.style.transform = `scale(${scaleX})`;
-    }, 500),
+        scaleY = winH / domH
+      dom.style.transform = `scale(${scaleX})`
+    }, 500)
   },
   mounted() {
-    this.loadCharts();
-    this.resizeScale("topOuter");
-  },
-};
+    this.setEditStyle()
+    this.loadCharts()
+    this.resizeScale('topOuter')
+  }
+}
 </script>
 
 <style lang="less">
@@ -202,19 +215,22 @@ export default {
   // height: 1080px;
 
   .editArea {
-    width: 1920px;
-    height: 1080px;
+    // width: 1920px;
+    // height: 1080px;
     transition: 0.3s all;
     transform-origin: left top;
     // border: solid gray 5px;
     position: relative;
+    background-repeat: no-repeat;
+    background-size: 100vh 100vw;
+
     .insideCharts {
       width: 100%;
       height: 100%;
     }
   }
   .chartItem {
-    border: 1px solid #8a8a8a;
+    border: 0px solid #8a8a8a;
   }
 }
 </style>
