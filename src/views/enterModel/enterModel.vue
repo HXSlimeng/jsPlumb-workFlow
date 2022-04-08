@@ -3,7 +3,8 @@
     <!-- Page Header -->
     <v-card class="editToolbar d-flex align-center justify-end my-1" elevation="0">
       <v-card-title style="position: absolute; left: 0">
-        <slot name="breadcrumb"></slot>
+        模型编辑
+        <!-- <slot name="breadcrumb"></slot> -->
       </v-card-title>
       <div class="mainCtrl mr-10">
         <v-btn class="ml-10 teal darken-1" @click="backToEdit" dark>返回模型管理</v-btn>
@@ -40,7 +41,13 @@
               <v-icon color="#0D47A1">mdi-database</v-icon>
               <v-list-item-content>
                 <v-list-item-title>
-                  {{ getNameByNodeType(child.node_params.node_type) }}
+                  <div class="leftDragTitle">
+                    {{
+                      getNameByNodeType(child.node_params.node_type)
+                        ? getNameByNodeType(child.node_params.node_type)
+                        : child.node_params.node_type
+                    }}
+                  </div>
                   <v-icon class="float-right">mdi-drag-variant</v-icon>
                 </v-list-item-title>
               </v-list-item-content>
@@ -120,7 +127,13 @@
           <v-list-item>
             <v-list-item-content>
               <v-list-item-title class="text-body-1">
-                <div class="titleComp">{{ getNameByNodeType(rightOverlay.info.node_params.node_type) }}</div>
+                <div class="titleComp">
+                  {{
+                    getNameByNodeType(rightOverlay.info.node_params.node_type)
+                      ? getNameByNodeType(rightOverlay.info.node_params.node_type)
+                      : rightOverlay.info.node_params.node_type
+                  }}
+                </div>
               </v-list-item-title>
             </v-list-item-content>
             <div class="d-flex justify-center align-center">
@@ -271,15 +284,7 @@
                 </template>-->
               </v-tab-item>
               <v-tab-item>
-                <Gener-charts></Gener-charts>
-                <!-- <v-card height="400px" class="mx-2 my-2">
-                  <v-card-title class="my-0 text-h5">数据分析饼图</v-card-title>
-                  <div id="pieChart"></div>
-                </v-card>
-                <v-card height="400px" class="mx-2 my-2">
-                  <v-card-title class="my-0 text-h5">数据分析柱形图</v-card-title>
-                  <div id="basicBar"></div>
-                </v-card>-->
+                <Gener-Charts :exeResult="json3d.node_result.X"></Gener-Charts>
               </v-tab-item>
               <v-tab-item>
                 <v-card-title class="my-0 text-h5">数据分析3d散点图</v-card-title>
@@ -304,6 +309,7 @@ import json3d from '../config/json3d.json'
 import leftListItem from '../config/leftListItem.json'
 import leftListItem2 from '../config/leftListItem2.json'
 import { saveGraph, runGraph } from '@/request/apis/drawApi.js'
+import { GenNonDuplicateID } from '@/common/until.js'
 import GenerCharts from '@/views/components/rightOverlayEcharts/index'
 
 export default {
@@ -321,8 +327,8 @@ export default {
       data: {
         graph_param: {
           graph_name: 'demo_graph',
-          graph_id: 'graph_index_1',
-          grap_type: 'json_graph'
+          graph_id: null,
+          graph_type: this.isETLPage ? 0 : 1
         },
         nodeList: [],
         lineList: []
@@ -363,7 +369,8 @@ export default {
         ['fitow_pca', 'PCA降维'],
         ['fitow_tsne', 'TSNE降维'],
         ['fitow_svm_regression', 'SVM回归'],
-        ['fitow_status_describe', '描述性统计分析']
+        ['fitow_status_describe', '描述性统计分析'],
+        ['fitow_etl_loader', 'ETL算子']
       ],
       listMap: {},
       leftBarVis: true,
@@ -500,23 +507,13 @@ export default {
           ]
         }
       },
+      json3d: json3d,
       chartInit: {
         scatter3DChart: false,
         pieChart: false,
         barChart: false
       },
-      headers: [
-        {
-          text: '第一项',
-          align: 'start',
-          sortable: false,
-          value: 'one'
-        },
-        { text: '第二项', value: 'two' },
-        { text: '第三项', value: 'three' },
-        { text: '第四项', value: 'four' },
-        { text: '第五项', value: 'five' }
-      ],
+      headers: [],
       testObj: {},
       initialModelData: '',
       isETLPage: null
@@ -526,19 +523,23 @@ export default {
     this.listMap = new Map(this.listTypeMap)
 
     this.jsPlumb = jsPlumb.getInstance()
-    console.log(this.$route)
     let modelInfo = this.$route.params.modelInfo
+    let sessionModel = window.sessionStorage.getItem('modelInfo')
     if (modelInfo) {
       this.reloadData(modelInfo)
       this.initialModelData = JSON.parse(JSON.stringify(modelInfo))
+    } else if (sessionModel) {
+      this.reloadData(JSON.parse(sessionModel))
     }
-
+    window.onbeforeunload = () => {
+      window.sessionStorage.setItem('modelInfo', JSON.stringify(this.data))
+    }
     this.isETLPage = this.$route.params.pageType == 'ETL'
     this.listItem = this.isETLPage ? leftListItem2.listitems : leftListItem.listitems
+    this.data.graph_param.graph_type = this.isETLPage ? 0 : 1
   },
   mounted() {
     // this.initNodeTypeObj()
-    console.log(this.$route)
     this.initNode()
     this.fixNodesPosition()
     this.$nextTick(() => {
@@ -547,6 +548,10 @@ export default {
 
     let draggableEl = document.querySelectorAll('.v-treeview-node__root')
     draggableEl.forEach(v => (v.draggable = true))
+  },
+  destroyed() {
+    window.onbeforeunload = null
+    window.sessionStorage.removeItem('modelInfo')
   },
   methods: {
     ...methods,
@@ -567,7 +572,10 @@ export default {
       let body = JSON.stringify(this.data)
     },
     goSaveGraph() {
-      console.log(this.data)
+      /* let graphId = this.data.graph_param.graph_id
+      if (!graphId) {
+        this.data.graph_param.graph_id = GenNonDuplicateID(8)
+      } */
       saveGraph(this.data)
         .then(res => {
           if (res.save_state == 'success') {
@@ -643,7 +651,7 @@ export default {
       if (modelChange) {
         console.log('modelHasChanged!!!')
       }
-      this.$router.push({ path: '/' })
+      this.$router.push({ path: this.isETLPage ? '/mangageEtl' : '/' })
     },
     checkIfModelChange() {
       return JSON.stringify(this.data) === JSON.stringify(this.initialModelData)
@@ -677,6 +685,25 @@ export default {
     },
     getNameByNodeType(type) {
       return this.listMap.get(type)
+    },
+    getHeaders() {
+      let tableHeader = null
+      let header = null
+      console.log()
+      this.rightOverlay.info.node_result
+        ? (tableHeader = this.rightOverlay.info.node_result.addtional_node_info.column_names
+            ? this.rightOverlay.info.node_result.addtional_node_info.column_names
+            : null)
+        : ''
+      if (tableHeader) {
+        let header = tableHeader.map(v => {
+          return {
+            text: v,
+            align: 'center'
+          }
+        })
+      }
+      return header ? header : []
     }
   }
 }
@@ -812,6 +839,12 @@ export default {
   border: dashed 2px gray;
   padding-left: 0px !important;
   margin-left: 64px;
+  .leftDragTitle {
+    max-width: 100px;
+    display: inline-block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .v-list-item__title {
     line-height: 24px !important;
   }

@@ -45,9 +45,7 @@
     <Model-comp>
       <template slot-scope="scope">
         {{ scope.headerInfo.graph_name }}
-        描述：{{ scope.headerInfo.graph_message }} 创建时间：{{
-          scope.headerInfo.graph_createTime
-        }}
+        描述：{{ scope.headerInfo.graph_message }} 创建时间：{{ scope.headerInfo.graph_createTime }}
       </template>
     </Model-comp>
     <v-navigation-drawer absolute permanent right style="margin-top: 51px" width="300">
@@ -75,9 +73,9 @@
 </template>
 
 <script>
-import datalist from "./config/data.json";
-import { GenNonDuplicateID } from "@/common/until.js";
-import ModelComp from "@/views/components/justModel";
+import datalist from './config/data.json'
+import { GenNonDuplicateID } from '@/common/until.js'
+import ModelComp from '@/views/components/justModel'
 
 export default {
   data() {
@@ -89,128 +87,127 @@ export default {
       singleSelect: false,
       modelHeaders: [
         {
-          text: "模型名称",
-          align: "start",
-          value: "graph_param.graph_name",
+          text: '模型名称',
+          align: 'start',
+          value: 'graph_param.graph_name'
         },
-        { text: "描述", value: "graph_param.graph_message" },
-        { text: "创建时间", value: "graph_param.graph_createTime" },
-        { text: "操作", value: "actions" },
+        { text: '描述', value: 'graph_param.graph_message' },
+        { text: '创建时间', value: 'graph_param.graph_createTime' },
+        { text: '操作', value: 'actions' }
       ],
       desserts: [
         {
-          model_name: "模型一",
-          model_message: "这是模型的简单描述",
-          create_time: "2022-01-11",
-        },
+          model_name: '模型一',
+          model_message: '这是模型的简单描述',
+          create_time: '2022-01-11'
+        }
       ],
       addModel: false,
-      createModelRules: [(value) => !!value || "此为必填项"],
-      newModelName: "",
-      newModelMessage: "",
+      createModelRules: [value => !!value || '此为必填项'],
+      newModelName: '',
+      newModelMessage: '',
       editedIndex: -1,
       editedItem: {
         graph_param: {
-          graph_name: "",
-          graph_id: "",
-          graph_message: "",
-          graph_createTime: "",
-          graph_type: "",
-        },
+          graph_name: '',
+          graph_id: '',
+          graph_message: '',
+          graph_createTime: '',
+          graph_type: ''
+        }
       },
       dialogDelete: false,
       editDialog: false,
       defaultItem: {
         graph_param: {
-          graph_name: "",
-          graph_id: "",
-          graph_message: "",
-          graph_createTime: "",
-          graph_type: "",
-        },
-      },
-    };
+          graph_name: '',
+          graph_id: '',
+          graph_message: '',
+          graph_createTime: '',
+          graph_type: ''
+        }
+      }
+    }
   },
   components: {
-    ModelComp,
+    ModelComp
   },
   methods: {
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.editDialog = true;
+      this.editedIndex = this.desserts.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.editDialog = true
     },
     enterViewModel(item) {
       this.$router.push({
-        name: "模型编辑",
+        name: '模型编辑',
         params: {
-          modelInfo: item,
-        },
-      });
+          modelInfo: item
+        }
+      })
     },
     openNewModel() {
-      this.addModel = false;
+      this.addModel = false
       this.$router.push({
-        name: "模型编辑",
+        name: '模型编辑',
         params: {
           modelInfo: {
             graph_param: {
               graph_name: this.newModelName,
               graph_id: GenNonDuplicateID(8),
               graph_message: this.newModelMessage,
-              graph_createTime: "2022-01-14",
-              graph_type: "json_graph",
+              graph_createTime: '2022-01-14',
+              graph_type: 'json_graph'
             },
-            create_time: "",
+            create_time: '',
             nodeList: [],
-            lineList: [],
-          },
-        },
-      });
+            lineList: []
+          }
+        }
+      })
     },
     batchDelete() {
-      let selectedArr = this.selected;
+      let selectedArr = this.selected
     },
     close() {
-      this.editDialog = false;
+      this.editDialog = false
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      })
     },
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
-      this.closeDelete();
+      this.desserts.splice(this.editedIndex, 1)
+      this.closeDelete()
     },
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
+      this.editedIndex = this.desserts.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.dialogDelete = true
     },
     closeDelete() {
-      this.dialogDelete = false;
+      this.dialogDelete = false
       this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      })
     },
     back() {
-      this.$router.go(-1);
+      this.$router.go(-1)
     },
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        Object.assign(this.desserts[this.editedIndex], this.editedItem)
       } else {
-        this.desserts.push(this.editedItem);
+        this.desserts.push(this.editedItem)
       }
-      this.close();
-    },
+      this.close()
+    }
   },
   created() {
-    this.desserts = datalist.datalist;
-  },
-};
+    this.desserts = datalist.datalist
+  }
+}
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

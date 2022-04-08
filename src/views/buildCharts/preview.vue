@@ -1,6 +1,7 @@
 <template>
   <div class="outBox">
     <div class="editArea" id="topOuter" :style="globalStyleStr">
+      <dv-decoration-11 class="visualAnaTit">{{ globalSetting.title }}</dv-decoration-11>
       <vue-draggable-resizable
         v-for="item in draggableItems"
         :key="item.id"
@@ -16,8 +17,18 @@
         :draggable="false"
         :resizable="false"
       >
-        <component :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id">
-          <div :id="item.id" class="insideCharts"></div>
+        <div v-if="item.option.isNotChart" class="insideCharts" @contextmenu.prevent="onContextmenu(item)">
+          <component
+            :ref="item.id"
+            :style="`width:${item.width};height:${item.height};`"
+            :width="item.width"
+            :height="item.height"
+            :config="item.option.config"
+            :is="item.option.compName"
+          ></component>
+        </div>
+        <component :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id" v-else>
+          <div :id="item.id" class="insideCharts" style="padding-top:20px"></div>
         </component>
 
         <!-- <p>
@@ -213,7 +224,16 @@ export default {
 .outBox {
   // width: 1920px;
   // height: 1080px;
-
+  .visualAnaTit {
+    width: 400px;
+    height: 100px;
+    color: #7ec699;
+    font-size: 2em;
+    position: absolute;
+    left: 50%;
+    margin-left: -200px;
+    top: 30px;
+  }
   .editArea {
     // width: 1920px;
     // height: 1080px;

@@ -12,7 +12,7 @@ import '@/icons'
 //echarts
 import * as echarts from 'echarts/core'
 import 'echarts-gl'
-import { PieChart, BarChart, Scatter3D, LineChart } from 'echarts/charts'
+import { PieChart, BarChart, Scatter3D, LineChart, ScatterChart } from 'echarts/charts'
 import { Scatter3DChart } from 'echarts-gl/charts'
 import { Grid3DComponent } from 'echarts-gl/components'
 import {
@@ -43,7 +43,8 @@ echarts.use([
   VisualMapComponent,
   LabelLayout,
   UniversalTransition,
-  CanvasRenderer
+  CanvasRenderer,
+  ScatterChart
 ])
 import dataV from '@jiaminghi/data-view'
 

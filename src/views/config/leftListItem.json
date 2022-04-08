@@ -19,7 +19,7 @@
                     "op_params": {}, 
               
                     "train_params": {
-                      "csv_file": "./client_demo/data/iris.data", 
+                      "csv_file": "./examples/client_demo/data/iris.data", 
                       "submit_result": true 
                     },
                     "predict_params": {}
@@ -301,6 +301,35 @@
                 }
               ],
               "node_type": "统计学习类算法"
+            },
+            {
+              "node_type": "数据源管理算子",
+              "items":[
+                                {
+                    "node_params": { 
+                        "node_type": "fitow_etl_loader", 
+                        "node_name": "etl_loader",
+                        "node_id": "1",
+                        "dependency": [], 
+                        "submit": true,
+                        "stage": "train",
+                        "last": false
+                    }, 
+
+                    "resource_params":{},
+
+                    "op_params": {}, 
+
+                    "train_params": {
+                        "graph_name": "ETLGraph",
+                        "graph_id": "ETL1" 
+                    },
+                    "predict_params": {}, 
+
+                    "show_params": {}
+
+                    }
+              ]
             }
     ]
 }

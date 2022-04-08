@@ -1,50 +1,321 @@
 {
-    "listitems": [
+  "listitems": [
+    {
+      "node_type": "etl图对象管理算子",
+      "items": [
         {
-            "node_type": "输入输出",
-            "items": [
-                {
-                    "node_params": {
-                        "node_type": "fitow_csv_loader",
-                        "node_name": "csv_loader",
-                        "node_id": "1",
-                        "dependency": [],
-                        "submit": true,
-                        "stage": "train",
-                        "last": false
-                    },
-                    "resource_params": {},
-                    "op_params": {},
-                    "train_params": {
-                        "csv_file": "./client_demo/data/iris.data",
-                        "submit_result": true
-                    },
-                    "predict_params": {}
-                }
-            ]
+          "node_params": {
+            "node_type": "fitow_csv_loader",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        },
+
+        {
+          "node_params": {
+            "node_type": "fitow_sql_object_loader",
+            "node_name": "sql_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "op_params": {},
+
+          "train_params": {
+            "sql_data_name": "uuid_name1",
+            "sql_data_id": "uuid1",
+            "table_name": "sql_data_management",
+            "db_name": "fitow_data_analysis"
+          },
+          "predict_params": {},
+
+          "show_params": {}
+        }
+      ]
+    },
+    {
+      "node_type": "快速装载",
+      "items": [
+        {
+          "node_params": {
+            "node_type": "Oracle装载",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
         },
         {
-            "node_type": "快速装载",
-            "items": [
-                {
-                    "node_params": {
-                        "node_type": "fitow_csv_loader",
-                        "node_name": "csv_loader",
-                        "node_id": "1",
-                        "dependency": [],
-                        "submit": true,
-                        "stage": "train",
-                        "last": false
-                    },
-                    "resource_params": {},
-                    "op_params": {},
-                    "train_params": {
-                        "csv_file": "./client_demo/data/iris.data",
-                        "submit_result": true
-                    },
-                    "predict_params": {}
-                }
-            ]
+          "node_params": {
+            "node_type": "Oracle卸载",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
         }
-    ]
+      ]
+    },
+    {
+      "action": "mdi-silverware-fork-knife",
+      "items": [
+        {
+          "node_params": {
+            "node_type": "fitow_standard_scaler",
+            "node_name": "std_scaler_1",
+            "node_id": "3",
+            "dependency": ["2"],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+
+          "resource_params": {},
+
+          "op_params": {},
+
+          "train_params": {
+            "submit_result": true
+          },
+
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "fitow_min_max_scaler",
+            "node_name": "minmax_scaler",
+            "node_id": "2",
+            "dependency": ["1"],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+
+          "op_params": {},
+
+          "train_params": {
+            "submit_result": true
+          },
+
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "fitow_data_slicer",
+            "node_name": "data_slicer",
+            "node_id": "2",
+            "dependency": ["1"],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+
+          "op_params": {},
+
+          "train_params": {
+            "head_n": 0,
+            "tail_n": 4,
+            "row_start": 1,
+            "row_end": 1,
+            "col_start": 1,
+            "col_end": 1,
+            "col_names": ["ad", "cd"],
+            "inverse": true,
+
+            "submit_result": true
+          },
+
+          "predict_params": {}
+        }
+      ],
+      "node_type": "数据清洗与转换"
+    },
+    {
+      "node_type": "装换组件",
+      "items": [
+        {
+          "node_params": {
+            "node_type": "表达式组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "清洗组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "聚合组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "集合组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "链接组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        }
+      ]
+    },
+    {
+      "node_type": "流程组件",
+      "items": [
+        {
+          "node_params": {
+            "node_type": "路由组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "分支组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        },
+        {
+          "node_params": {
+            "node_type": "检验组件",
+            "node_name": "csv_loader",
+            "node_id": "1",
+            "dependency": [],
+            "submit": true,
+            "stage": "train",
+            "last": false
+          },
+          "resource_params": {},
+          "op_params": {},
+          "train_params": {
+            "csv_file": "./examples/client_demo/data/iris.data",
+            "submit_result": true
+          },
+          "predict_params": {}
+        }
+      ]
+    }
+  ]
 }

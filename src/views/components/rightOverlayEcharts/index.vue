@@ -2,12 +2,7 @@
   <div class="my_page">
     <v-card-title class="text-h6 font-weight-regular justify-space-between">
       <span>{{ currentTitle }}</span>
-      <v-avatar
-        color="primary lighten-2"
-        class="subheading white--text"
-        size="24"
-        v-text="GenerateStep"
-      ></v-avatar>
+      <v-avatar color="primary lighten-2" class="subheading white--text" size="24" v-text="GenerateStep"></v-avatar>
     </v-card-title>
 
     <v-window v-model="GenerateStep">
@@ -20,17 +15,17 @@
         </v-card-text>
       </v-window-item>
 
-      <v-window-item :value="2">
+      <!-- <v-window-item :value="2">
         <v-card-text>
           <v-text-field label="Password" type="password"></v-text-field>
           <v-text-field label="Confirm Password" type="password"></v-text-field>
-          <!-- <span class="text-caption grey--text text--darken-1">
+          <span class="text-caption grey--text text--darken-1">
               Please enter a password for your account
-          </span>-->
+          </span>
         </v-card-text>
-      </v-window-item>
+      </v-window-item> -->
 
-      <v-window-item :value="3">
+      <v-window-item :value="2">
         <div class="pa-4 text-center">
           <div id="chart"></div>
         </div>
@@ -42,7 +37,7 @@
     <v-card-actions>
       <v-btn :disabled="GenerateStep === 1" text @click="GenerateStep--">Back</v-btn>
       <v-spacer></v-spacer>
-      <v-btn :disabled="GenerateStep === 3" color="primary" depressed @click="nextStep">Next</v-btn>
+      <v-btn :disabled="GenerateStep === 2" color="primary" depressed @click="nextStep">Next</v-btn>
     </v-card-actions>
   </div>
 </template>
@@ -50,21 +45,22 @@
 <script>
 export default {
   components: {},
+  props: ['exeResult'],
   data() {
     return {
       GenerateStep: 1,
       charinit: null,
       chartSelected: null,
-      chartOpts: ["饼图", "柱形图"],
+      chartOpts: ['饼图', '柱形图'],
       chartsOpt: {
         pieOption: {
           title: {
-            text: "Referer of a Website",
-            subtext: "Fake Data",
-            left: "center",
+            text: 'Referer of a Website',
+            subtext: 'Fake Data',
+            left: 'center'
           },
           tooltip: {
-            trigger: "item",
+            trigger: 'item'
           },
           /* legend: {
                   orient: 'vertical',
@@ -72,85 +68,82 @@ export default {
                 }, */
           series: [
             {
-              name: "Access From",
-              type: "pie",
-              radius: "40%",
+              name: 'Access From',
+              type: 'pie',
+              radius: '40%',
               data: [
-                { value: 1048, name: "Search Engine" },
-                { value: 735, name: "Direct" },
-                { value: 580, name: "Email" },
-                { value: 484, name: "Union Ads" },
-                { value: 300, name: "Video Ads" },
+                { value: 1048, name: 'Search Engine' },
+                { value: 735, name: 'Direct' },
+                { value: 580, name: 'Email' },
+                { value: 484, name: 'Union Ads' },
+                { value: 300, name: 'Video Ads' }
               ],
               emphasis: {
                 itemStyle: {
                   shadowBlur: 10,
                   shadowOffsetX: 0,
-                  shadowColor: "rgba(0, 0, 0, 0.5)",
-                },
-              },
-            },
-          ],
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            }
+          ]
         },
         basicBarOpt: {
           xAxis: {
-            type: "category",
-            data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
           },
           yAxis: {
-            type: "value",
+            type: 'value'
           },
           series: [
             {
               data: [120, 200, 150, 80, 70, 110, 130],
-              type: "bar",
+              type: 'bar',
               showBackground: true,
               backgroundStyle: {
-                color: "rgba(180, 180, 180, 0.2)",
-              },
-            },
-          ],
-        },
-      },
-    };
+                color: 'rgba(180, 180, 180, 0.2)'
+              }
+            }
+          ]
+        }
+      }
+    }
   },
   computed: {
     currentTitle() {
       switch (this.GenerateStep) {
         case 1:
-          return "选择类型";
+          return '选择类型'
         case 2:
-          return "配置数据";
+          return '配置数据'
         default:
-          return "Created!";
+          return 'Created!'
       }
-    },
+    }
   },
-  created() { },
+  created() {},
   // 生命周期 - 挂载完成（可以访问DOM元素）
-  mounted() { },
+  mounted() {
+    // console.log(this.exeResult)
+  },
   // 方法集合
   methods: {
     nextStep() {
-      this.GenerateStep++;
-      console.log(this.GenerateStep);
-      if (this.GenerateStep == 3) {
+      this.GenerateStep++
+      if (this.GenerateStep == 2) {
         setTimeout(() => {
-          let chartDom = document.getElementById("chart");
-          this.charinit = this.$echarts.init(chartDom);
-          this.charinit.setOption(
-            this.chartSelected == 0
-              ? this.chartsOpt.pieOption
-              : this.chartsOpt.basicBarOpt
-          );
-        }, 0);
+          let chartDom = document.getElementById('chart')
+          this.charinit = this.$echarts.init(chartDom)
+          this.charinit.setOption(this.chartSelected == 0 ? this.chartsOpt.pieOption : this.chartsOpt.basicBarOpt)
+        }, 0)
       }
-    },
-  },
-};
+    }
+  }
+}
 </script>
 
-<style lang='less' scoped>
+<style lang="less" scoped>
 //@import url(); 引入公共css类
 #chart {
   height: 320px;

@@ -2,12 +2,7 @@
   <div
     class="node-item"
     ref="node"
-    :class="[
-      isActive || isSelected ? 'active' : '',
-      { nodedisab: nodeParams.disabled },
-      { lastNode: nodeParams.last },
-      'px-3'
-    ]"
+    :class="[isActive || isSelected ? 'active' : '', { nodedisab: nodeParams.disabled }, { lastNode: nodeParams.last }, 'px-3']"
     :style="flowNodeContainer"
     v-click-outside="setNotActive"
     @click="setActive"
@@ -31,36 +26,50 @@
     <div class="node-anchor anchor-bottom" v-show="ifShownodeAnchor"></div>
     <div class="node-anchor anchor-left" v-show="ifShownodeAnchor"></div>
     <!-- 配置数据弹出框 -->
-    <v-dialog
-      v-model="formInfoShow"
-      max-width="600"
-      :hide-overlay="false"
-      :no-click-animation="true"
-    >
+    <v-dialog v-model="formInfoShow" max-width="600" :hide-overlay="false" :no-click-animation="true">
       <v-card>
-        <v-card-title class="text-h6 grey lighten-2">配置参数</v-card-title>
+        <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">配置参数</v-card-title>
         <v-form ref="form" lazy-validation class="ma-3">
           <span class="text-h6">train_params</span>
           <v-divider class="my-3"></v-divider>
-          <div v-for="(config, key) in node.train_params" :key="key">
-            <v-text-field
-              v-if="
-                key.indexOf('_file') == -1 && !(key == 'additional_run_kwargs')
-              "
-              :label="key"
-              v-model="node.train_params[key]"
-              required
-              outlined
-              height="10px"
-            ></v-text-field>
+          <!-- 配置sql数据源单独配置 -->
+          <div v-if="nodeParams.node_type == 'fitow_sql_object_loader'">
+            <v-select
+              :items="sqlSourceItem"
+              v-model="sqlSelect"
+              item-text="sql_data_name"
+              return-object
+              @change="setDataParam"
+              label="选择数据库"
+            ></v-select>
+            <div v-for="(config, key) in node.train_params" :key="key">
+              <v-text-field
+                v-if="getSpecTrainConfig(nodeParams.node_type, key)"
+                :label="key"
+                v-model="node.train_params[key]"
+                required
+                outlined
+                height="10px"
+              ></v-text-field>
+            </div>
+          </div>
+          <div v-else>
+            <div v-for="(config, key) in node.train_params" :key="key">
+              <v-text-field
+                v-if="key.indexOf('_file') == -1 && key != 'additional_run_kwargs'"
+                :label="key"
+                v-model="node.train_params[key]"
+                required
+                outlined
+                height="10px"
+              ></v-text-field>
+            </div>
           </div>
           <span class="text-h6">op_params</span>
           <v-divider class="my-3"></v-divider>
           <div v-for="(config, key) in node.op_params" :key="key">
             <v-text-field
-              v-if="
-                key.indexOf('_file') == -1 && !(key == 'additional_run_kwargs')
-              "
+              v-if="key.indexOf('_file') == -1 && !(key == 'additional_run_kwargs')"
               :label="key"
               v-model="node.train_params[key]"
               required
@@ -72,9 +81,7 @@
           <v-divider class="my-3"></v-divider>
           <div v-for="(config, key) in node.resource_params" :key="key">
             <v-text-field
-              v-if="
-                key.indexOf('_file') == -1 && !(key == 'additional_run_kwargs')
-              "
+              v-if="key.indexOf('_file') == -1 && !(key == 'additional_run_kwargs')"
               :label="key"
               v-model="node.train_params[key]"
               required
@@ -86,26 +93,18 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="completeFill">完成</v-btn>
-          <v-btn
-            color="secondary"
-            @click="connectToDatabase"
-            :loading="dataBaseFetching"
-            :disabled="nodeParams.submit_result"
-          >计算数据</v-btn>
+          <v-btn color="secondary" @click="connectToDatabase" :loading="dataBaseFetching" :disabled="nodeParams.submit_result"
+            >计算数据</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
     <!-- 展示详情 -->
     <v-dialog v-model="showDetialMess" max-width="600">
       <v-card min-height="600">
-        <v-card-title class="text-h6 grey lighten-2">查看输出</v-card-title>
+        <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">查看输出</v-card-title>
         <div v-if="node.node_result">
-          <v-data-table
-            :headers="headers"
-            :items="node.node_result.X"
-            :items-per-page="10"
-            class="elevation-1"
-          >
+          <v-data-table :headers="headers" :items="node.node_result.X" :items-per-page="10" class="elevation-1">
             <template #item="{ item }">
               <tr>
                 <td v-for="(chdItem, index) in item" :key="index">{{ item[index] }}</td>
@@ -123,16 +122,18 @@
 </template>
 
 <script>
-import { nodeResult, runGraph } from "@/request/apis/drawApi.js";
-import ClickOutside from "vue-click-outside";
-import json3d from "@/views/config/json3d.json";
+import { nodeResult, runGraph } from '@/request/apis/drawApi.js'
+import ClickOutside from 'vue-click-outside'
+import json3d from '@/views/config/json3d.json'
+import { sql_query } from '@/request/apis/dataManageApi.js'
+
 export default {
-  name: "nodeItem",
+  name: 'nodeItem',
   props: {
-    node: Object,
+    node: Object
   },
   directives: {
-    ClickOutside,
+    ClickOutside
   },
   computed: {
     // 节点容器样式
@@ -142,19 +143,15 @@ export default {
           top: this.node.node_params.top,
           left: this.node.node_params.left,
           ...this.nodeStatusStyle[this.nodeStatus]
-        };
-      },
+        }
+      }
     },
     ifShownodeAnchor() {
-      return (
-        this.mouseEnter &&
-        !this.node.node_params.disabled &&
-        !this.node.node_params.last
-      );
+      return this.mouseEnter && !this.node.node_params.disabled && !this.node.node_params.last
     },
     nodeParams() {
-      return this.node.node_params;
-    },
+      return this.node.node_params
+    }
   },
   data() {
     return {
@@ -165,46 +162,35 @@ export default {
       showDetialMess: false,
       //表单数据
       connectFrom: {
-        dataBaseName: "",
-        password: "",
+        dataBaseName: '',
+        password: ''
       },
       ruleInline: {
         user: [
           {
             required: true,
-            message: "Please fill in the user name",
-            trigger: "blur",
-          },
+            message: 'Please fill in the user name',
+            trigger: 'blur'
+          }
         ],
         password: [
           {
             required: true,
-            message: "Please fill in the password.",
-            trigger: "blur",
+            message: 'Please fill in the password.',
+            trigger: 'blur'
           },
           {
-            type: "string",
+            type: 'string',
             min: 6,
-            message: "The password length cannot be less than 6 bits",
-            trigger: "blur",
-          },
-        ],
+            message: 'The password length cannot be less than 6 bits',
+            trigger: 'blur'
+          }
+        ]
       },
       dataBaseFetching: false,
-      headers: [
-        {
-          text: "第一项",
-          align: "start",
-          sortable: false,
-          value: "one",
-        },
-        { text: "第二项", value: "two" },
-        { text: "第三项", value: "three" },
-        { text: "第四项", value: "four" },
-        { text: "第五项", value: "five" },
-      ],
+      headers: [],
       nodeStatus: 0,
-      statusIcon: ["mdi-pencil-circle", "mdi-check-circle", "", "mdi-alert-circle"],
+      statusIcon: ['mdi-pencil-circle', 'mdi-check-circle', '', 'mdi-alert-circle'],
       nodeStatusStyle: [
         {},
         {
@@ -216,34 +202,37 @@ export default {
           color: '#E5752E',
           backgroundColor: '#FBEDB3'
         }
-      ]
-    };
+      ],
+      /* sql数据源配置 */
+      sqlSourceItem: [],
+      sqlSelect: null
+    }
   },
   methods: {
     showAnchor() {
-      this.mouseEnter = true;
+      this.mouseEnter = true
     },
     hideAnchor() {
-      this.mouseEnter = false;
+      this.mouseEnter = false
     },
     onContextmenu() {
       this.$contextmenu({
         items: [
           {
-            label: "删除",
+            label: '删除',
             disabled: false,
-            icon: "",
+            icon: '',
             onClick: () => {
-              this.deleteNode();
-            },
+              this.deleteNode()
+            }
           },
           {
-            label: "查看输出",
+            label: '查看输出',
             disabled: false,
-            icon: "",
+            icon: '',
             onClick: () => {
-              this.showDetialMess = true;
-            },
+              this.showDetialMess = true
+            }
           },
           /* {
           label: '查看详细数据',
@@ -259,110 +248,111 @@ export default {
           }
         }, */
           {
-            label: "配置参数",
+            label: '配置参数',
             disabled: false,
-            icon: "",
+            icon: '',
             onClick: () => {
-              this.formInfoShow = true;
-            },
-          },
+              this.formInfoShow = true
+            }
+          }
         ],
         event,
-        customClass: "custom-class",
+        customClass: 'custom-class',
         zIndex: 9999,
-        minWidth: 180,
-      });
+        minWidth: 180
+      })
     },
     setActive() {
       if (window.event.ctrlKey) {
-        this.isSelected = !this.isSelected;
-        return false;
+        this.isSelected = !this.isSelected
+        return false
       }
       if (this.isActive) {
-        return;
+        return
       } else {
-        this.$emit("ctlRightOverLay", this.node, this.isActive);
+        console.log(this.headers)
+        this.$emit('ctlRightOverLay', this.node, this.isActive, this.headers)
       }
-      this.isActive = true;
-      this.isSelected = false;
+      this.isActive = true
+      this.isSelected = false
       setTimeout(() => {
-        this.$emit("changeLineState", this.nodeParams.node_id, true);
-      }, 0);
+        this.$emit('changeLineState', this.nodeParams.node_id, true)
+      }, 0)
     },
     setNotActive() {
       if (!window.event.ctrlKey) {
-        this.isSelected = false;
+        this.isSelected = false
       }
       if (!this.isActive) {
-        return;
+        return
       }
-      this.$emit("changeLineState", this.nodeParams.node_id, false);
-      this.isActive = false;
+      this.$emit('changeLineState', this.nodeParams.node_id, false)
+      this.isActive = false
     },
     editNode() {
-      this.newNodeName = this.node.nodeName;
+      this.newNodeName = this.node.nodeName
       this.$Modal.confirm({
-        render: (h) => {
-          return h("Input", {
+        render: h => {
+          return h('Input', {
             props: {
               value: this.newNodeName,
-              autofocus: true,
+              autofocus: true
             },
             on: {
-              input: (val) => {
-                this.newNodeName = val;
-              },
-            },
-          });
+              input: val => {
+                this.newNodeName = val
+              }
+            }
+          })
         },
         onOk: () => {
-          this.$emit("setNodeName", this.nodeParams.node_id, this.newNodeName);
-        },
-      });
+          this.$emit('setNodeName', this.nodeParams.node_id, this.newNodeName)
+        }
+      })
     },
     deleteNode() {
-      this.$emit("deleteNode", this.node);
+      this.$emit('deleteNode', this.node)
     },
     connectToDatabase() {
-      let _this = this;
-      this.dataBaseFetching = true;
-      this.nodeStatus = 2;
+      let _this = this
+      this.dataBaseFetching = true
+      this.nodeStatus = 2
       nodeResult({
         node_name: this.nodeParams.node_name,
-        node_id: this.nodeParams.node_id,
+        node_id: this.nodeParams.node_id
       })
-        .then((res) => {
-          console.log({
-            fetch_result: res,
-          });
-          let { node_result, node_exec_state } = res;
-          this.node.node_result = node_result;
-          this.node.node_exec_state = node_exec_state;
+        .then(res => {
+          let { node_result, node_exec_state } = res
+          this.node.node_result = node_result
+          this.setTableHeader()
+          this.node.node_exec_state = node_exec_state
           if (res.node_exec_state.state_id == 0) {
-            this.$emit("ctlRightOverLay", this.node, this.isActive);
+            console.log(this.headers)
+
+            this.$emit('ctlRightOverLay', this.node, this.isActive, this.headers)
             // this.$nextTick(()=>{
             //   this.$parent.jsPlumb.makeTarget(this.nodeParams.node_id, this.$parent.jsplumbTargetOptions);
             // })
-            this.$message.alertMessage("操作成功！");
-            this.nodeStatus = 1;
-            this.dataBaseFetching = false;
+            this.$message.alertMessage('操作成功！')
+            this.nodeStatus = 1
+            this.dataBaseFetching = false
             // this.formInfoShow = false;
             // delete this.nodeParams.disabled
             //重新刷新列表数据
           } else if (res.node_exec_state.state_id == 1) {
             setTimeout(() => {
-              this.connectToDatabase();
-            }, 2000);
+              this.connectToDatabase()
+            }, 2000)
           } else {
-            this.nodeStatus = 3;
-            this.dataBaseFetching = false;
-            this.$message.alertMessage(node_exec_state.fail_info);
+            this.nodeStatus = 3
+            this.dataBaseFetching = false
+            this.$message.alertMessage(node_exec_state.fail_info)
           }
         })
-        .catch((err) => {
-          this.dataBaseFetching = false;
-          console.log(err);
-        });
+        .catch(err => {
+          this.dataBaseFetching = false
+          console.log(err)
+        })
       //   (function (params) {
       //   return new Promise((resolve,reject,pendding)=>{
       //     setTimeout(() => {
@@ -415,23 +405,68 @@ export default {
       //     })
     },
     completeFill() {
-      this.formInfoShow = false;
+      this.formInfoShow = false
     },
     getNode() {
-      return document.getElementById(this.nodeParams.node_id);
+      return document.getElementById(this.nodeParams.node_id)
     },
     globalMessage(val) {
-      this.$parent.alertMessage(val);
+      this.$parent.alertMessage(val)
     },
     getParentParams() {
-      this.$emit("getParentParams", this.nodeParams.node_id);
+      this.$emit('getParentParams', this.nodeParams.node_id)
     },
     getNamenBytype(type) {
-      return this.$parent.getNameByNodeType(type);
+      return this.$parent.getNameByNodeType(type) ? this.$parent.getNameByNodeType(type) : type
     },
+    //数据源配置节点
+    getSpecTrainConfig(nodeType, paramKey) {
+      let valid = true
+      switch (nodeType) {
+        case 'fitow_sql_object_loader':
+          if (paramKey == 'sql_data_name' || paramKey == 'sql_data_id') {
+            valid = false
+          }
+          break
+
+        default:
+          break
+      }
+      return valid
+    },
+    fetchSqlSource() {
+      sql_query({})
+        .then(res => {
+          if (res.success == 'success') {
+            this.sqlSourceItem = res.result
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    setDataParam() {
+      const { sql_data_id, sql_data_name } = this.sqlSelect
+      this.node.train_params.sql_data_id = sql_data_id
+      this.node.train_params.sql_data_name = sql_data_name
+    },
+    setTableHeader() {
+      let tableHeader = null
+      this.node.node_result ? (tableHeader = this.node.node_result.addtional_node_info.column_names) : ''
+      if (tableHeader) {
+        this.headers = tableHeader.map(v => {
+          return {
+            text: v,
+            align: 'center'
+          }
+        })
+      }
+    }
   },
-  mounted() { },
+  mounted() {},
   created() {
+    this.nodeParams.node_type == 'fitow_sql_object_loader' && this.fetchSqlSource()
+    this.setTableHeader()
     /* if (this.nodeParams.submit && !this.node.node_result) {
       this.nodeParams.disabled = true;
     } */
@@ -441,8 +476,8 @@ export default {
     setTimeout(() => {
       this.nodeStatus = 1
     }, 4000); */
-  },
-};
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -464,7 +499,7 @@ export default {
   z-index: 9995;
   background-color: rgba(0, 82, 217, 0.3);
   &::after {
-    content: "";
+    content: '';
     width: 184px;
     height: 4px;
     position: absolute;

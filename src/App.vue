@@ -1,13 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      elevation="1"
-      dense
-      v-if="!$route.meta.hideNav"
-      height="50px"
-      :clipped-left="true"
-    >
+    <v-app-bar app elevation="1" dense v-if="!$route.meta.hideNav" height="50px" :clipped-left="true">
       <v-img :src="fitowIcon" max-height="80" max-width="160"></v-img>
       <div class="text-h5 ml-4">AI大数据分析平台</div>
       <!-- <v-app-bar-title class="text-h5">绘制流程图</v-app-bar-title> -->
@@ -43,7 +36,6 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
-
     <v-main>
       <router-view>
         <template #breadcrumb>
@@ -56,66 +48,60 @@
 </template>
 
 <script>
-import router from "@/router/index";
+import router from '@/router/index'
 
 export default {
-  name: "App",
+  name: 'App',
   created() {
-    console.log(process.env);
+    console.log(process.env)
   },
   data: () => ({
     //
     mainLeftBar: true,
     router: router.options.routes,
-    routeIcon: [
-      "mdi-database-cog",
-      "mdi-sitemap",
-      "mdi-view-dashboard",
-      "mdi-publish",
-      "mdi-arrange-bring-forward",
-    ],
-    fitowIcon: require("@/assets/fitow.png"),
-    breadcrumbItem: [{
-      text: '模型管理',
-      disabled: false,
-      to: '/manageModel',
-    },
-    {
-      text: '模型编辑',
-      disabled: false,
-      to: 'enterModel',
-    }
+    routeIcon: ['mdi-database-cog', 'mdi-sitemap', 'mdi-view-dashboard', 'mdi-publish', 'mdi-arrange-bring-forward'],
+    fitowIcon: require('@/assets/fitow.png'),
+    breadcrumbItem: [
+      {
+        text: '模型管理',
+        disabled: false,
+        to: '/manageModel'
+      },
+      {
+        text: '模型编辑',
+        disabled: false,
+        to: 'enterModel'
+      }
     ],
     selectedItem: '0'
   }),
   methods: {
     routerLinkTo(route) {
       if (route.path != this.$route.path) {
-        this.$router.push(route.path);
+        this.$router.push(route.path)
       }
-    },
+    }
   },
   computed: {
     menuRoute() {
-      return router.options.routes.filter((item) => item.meta.menuList);
-    },
+      return router.options.routes.filter(item => item.meta.menuList)
+    }
   },
   watch: {
     $route(to, from) {
       switch (to.path) {
         case '':
-
-          break;
+          break
 
         default:
-          break;
+          break
       }
     }
-  },
-};
+  }
+}
 </script>
 <style lang="less" scoped>
-@import url("./style/vuetifyPreset.less");
+@import url('./style/vuetifyPreset.less');
 /deep/.v-app-bar-title__placeholder {
   text-overflow: unset;
 }
@@ -126,4 +112,3 @@ export default {
   color: #009d89 !important;
 }
 </style>
-

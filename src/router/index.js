@@ -26,8 +26,8 @@ const routes = [
     ]
   },
   {
-    path: '/previewDBTable',
-    name: '数据源管理',
+    path: '/dataManage/previewDBTable',
+    name: '/dataManage/previewDBTable',
     component: PreviewDBTable,
     meta: {}
   },
@@ -40,6 +40,7 @@ const routes = [
       icon: 'mdi-sitemap'
     }
   },
+
   {
     path: '/mangageEtl',
     name: '数据ETL管理',
@@ -47,6 +48,14 @@ const routes = [
     meta: {
       menuList: true,
       icon: '数据ETL管理'
+    }
+  },
+  {
+    path: '/mangageEtl/enterModel',
+    name: '/mangageEtl/enterModel',
+    component: EnterModel,
+    meta: {
+      menuList: false
     }
   },
   {
@@ -59,6 +68,14 @@ const routes = [
     }
   },
   {
+    path: '/manageModel/enterModel',
+    name: '/manageModel/enterModel',
+    component: EnterModel,
+    meta: {
+      menuList: false
+    }
+  },
+  {
     path: '',
     redirect: '/manageModel',
     meta: {
@@ -66,23 +83,13 @@ const routes = [
       icon: 'mdi-arrange-bring-forward'
     }
   },
-
   {
-    path: '/modelPublishing',
+    path: '/mangageEtl/modelPublishing',
     name: 'ETL发布',
     component: ModelPublishing,
     meta: {
       menuList: false,
       icon: 'ETL发布'
-    }
-  },
-
-  {
-    path: '/buildCharts',
-    name: '创建可视化',
-    component: () => import('../views/buildCharts/buildCharts'),
-    meta: {
-      menuList: false
     }
   },
   {
@@ -92,6 +99,14 @@ const routes = [
     meta: {
       menuList: true,
       icon: '可视化分析'
+    }
+  },
+  {
+    path: '/manageVisualAna/buildCharts',
+    name: '创建可视化',
+    component: () => import('../views/buildCharts/buildCharts'),
+    meta: {
+      menuList: false
     }
   },
   {

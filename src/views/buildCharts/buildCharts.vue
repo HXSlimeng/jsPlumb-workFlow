@@ -15,9 +15,9 @@
             <v-list>
               <v-list-item-group v-model="selectedItem" color="primary">
                 <v-list-item v-for="(item, i) in chartOptList" :key="i" ref="dragItem" @dragstart="currDragType = i">
-                  <!-- <v-list-item-icon>
-              <v-icon v-text="item.icon"></v-icon>
-                  </v-list-item-icon>-->
+                  <v-list-item-icon>
+                    <svg-icon :icon-class="item.icon" className="chartIcon"></svg-icon>
+                  </v-list-item-icon>
                   <v-list-item-content draggable="true">
                     <v-list-item-title v-text="i"></v-list-item-title>
                   </v-list-item-content>
@@ -31,8 +31,9 @@
             <v-subheader>主题选择</v-subheader>
             <v-select :items="themeItems" outlined dense v-model="themeSelcted"></v-select>
             <v-subheader>画布尺寸</v-subheader>
-            <v-text-field suffix="px" dense outlined v-model="globalSetting.editAreaSize.w"></v-text-field>
-            <v-text-field suffix="px" dense outlined v-model="globalSetting.editAreaSize.h"></v-text-field>
+            <v-select :items="screenSizeItems" v-model="screenSizeSelec" @change="setScreenSize" dense outlined></v-select>
+            <!--             <v-text-field suffix="px" dense outlined v-model="globalSetting.editAreaSize.w"></v-text-field>
+            <v-text-field suffix="px" dense outlined v-model="globalSetting.editAreaSize.h"></v-text-field> -->
             <v-subheader>背景</v-subheader>
             <v-radio-group v-model="globalSetting.bgModeSelc" row @change="setGlobalBg">
               <v-radio label="颜色" value="color"></v-radio>
@@ -81,7 +82,8 @@
     </v-card>
     <div>
       <div class="outBox">
-        <div class="editArea" id="editMain" :style="getEditAreaMatrix1()">
+        <dv-border-box-10 :style="getEditAreaMatrix1()" id="editMain" class="editArea">
+          <dv-decoration-11 class="visualAnaTit">{{ globalSetting.title }}</dv-decoration-11>
           <vue-draggable-resizable
             v-for="item in draggableItems"
             :key="item.flag"
@@ -100,15 +102,37 @@
             :draggable="item.draggable"
             :resizable="item.resizable"
           >
-            <component :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id">
-              <div :id="item.id" class="insideCharts" @contextmenu.prevent="onContextmenu(item)"></div>
+            <div v-if="item.option.isNotChart" class="insideCharts" @contextmenu.prevent="onContextmenu(item)">
+              <component
+                :ref="item.id"
+                :style="`width:${item.width};height:${item.height};`"
+                :width="item.width"
+                :height="item.height"
+                :config="item.option.config"
+                :is="item.option.compName"
+              ></component>
+            </div>
+            <component :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id" v-else>
+              <div :id="item.id" class="insideCharts" style="padding-top:20px" @contextmenu.prevent="onContextmenu(item)"></div>
             </component>
             <!-- <p>
               X: {{ item.x }} / Y: {{ item.y }} - Width: {{ item.width }} /
               Height: {{ item.height }}
             </p>-->
           </vue-draggable-resizable>
-        </div>
+        </dv-border-box-10>
+      </div>
+      <div class="scaleSlider">
+        <!-- <v-slider
+          v-model="graphScale"
+          max="200"
+          min="50"
+          step="10"
+          :color="ex1.color"
+          :label="graphScale.toFixed(0) + '%'"
+          vertical
+          thumb-label="always"
+        ></v-slider> -->
       </div>
     </div>
     <v-dialog v-model="configDialog" width="500">
@@ -122,14 +146,19 @@
             <v-radio v-for="(n, i) in dataSource.xAxis" :key="i" :label="`数据源 ${i + 1}`" :value="n"></v-radio>
           </v-radio-group>
           <v-radio-group v-model="currentChartOpt.option.series[0].data" label="数据">
-            <v-radio v-for="(n, i) in dataSource.data" :key="i" :label="`数据源 ${i + 1}`" :value="n"></v-radio>
+            <v-radio
+              v-for="(n, i) in dataSource.data"
+              :key="i"
+              :label="`数据源 ${i + 1}${i == 2 ? '(推荐饼图)' : ''}${i == 3 ? '(推荐散点图)' : ''}`"
+              :value="n"
+            ></v-radio>
           </v-radio-group>
         </div>
         <v-card-actions>
           <div></div>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="readyToCreate">确定</v-btn>
           <v-btn color="primary" text @click="configDialog = false">取消</v-btn>
+          <v-btn color="primary" text @click="readyToCreate">确定</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -215,19 +244,37 @@ export default {
       ],
       imageSelected: 0,
       globalSetting: {
-        themeBgColor: '#ffffff',
+        themeBgColor: '#455a64',
         themeBgImage: '',
         bgModeSelc: 'color',
         editAreaSize: {
-          w: 2556,
-          h: 1600
-        }
+          w: 1920,
+          h: 1080
+        },
+        title: ''
+      },
+      testData: 25,
+      ex1: { label: 'color', val: 25, color: 'orange darken-3' },
+      screenSizeItems: ['2560*1600', '1920*1440', '1920*1080', '1600*1200'],
+      screenSizeSelec: '1920*1080'
+    }
+  },
+  computed: {
+    graphScale: {
+      get() {
+        return this.editAreaMatrix.scaleX * 100
+      },
+      set(val) {
+        this.editAreaMatrix.scaleX = val / 100
+        this.editAreaMatrix.scaleY = val / 100
       }
     }
   },
-  computed: {},
   watch: {},
-  created() {},
+  created() {
+    const { title } = this.$route.params
+    this.globalSetting.title = title
+  },
   mounted() {
     this.dragInit()
     this.setEditAreaSize()
@@ -240,7 +287,6 @@ export default {
     setEditAreaSize() {
       let outBox = document.querySelector('.outBox')
       let editArea = document.querySelector('#editMain')
-
       let outBoxRealWidth = getComputedStyle(outBox).width.replace('px', '') - getComputedStyle(outBox).paddingLeft.replace('px', '')
       let editWidth = getComputedStyle(editArea).width.replace('px', '')
       let scaleMultiple = outBoxRealWidth / editWidth
@@ -275,9 +321,10 @@ export default {
 
       let _this = this
       editBox.addEventListener('mousedown', function wrapMousedown(e) {
-        if (!e.srcElement.id) {
+        if (!e.srcElement.id && e.target.className != 'border-box-content') {
           return
         }
+        console.log(111)
         this.style.cursor = 'grabbing'
         editBox.onmousemove = function wrapMouseout(e) {
           let tarX = e.movementX
@@ -307,17 +354,12 @@ export default {
     // },
     dragInit() {
       let endArea = document.querySelector('.editArea')
-      endArea.addEventListener('dragenter', event => {
-        endArea.style.border = 'red solid 5px'
-      })
-      endArea.addEventListener('dragleave', event => {
-        endArea.style.border = 'gray solid 5px'
-      })
+      endArea.addEventListener('dragenter', event => {})
+      endArea.addEventListener('dragleave', event => {})
       endArea.addEventListener('dragover', event => {
         event.preventDefault()
       })
       endArea.addEventListener('drop', e => {
-        endArea.style.border = 'gray solid 5px'
         let fatherboxMess = endArea.getBoundingClientRect()
 
         //创建图将前一个图的active取消
@@ -333,11 +375,16 @@ export default {
           type: this.currDragType,
           flag: null,
           option: this.chartOptList[this.currDragType],
-          borderStyle: 'DvBorderBox1'
+          borderStyle: 'DvBorderBox12'
         }
+
         editCharts.flag = editCharts.id
-        this.currentChartOpt = editCharts
-        this.configDialog = true
+        if (editCharts.option.isNotChart) {
+          this.draggableItems.push(editCharts)
+        } else {
+          this.currentChartOpt = editCharts
+          this.configDialog = true
+        }
       })
     },
     setGlobalBg() {
@@ -392,6 +439,12 @@ export default {
     },
     borderStyleChange() {
       this.createCharts(this.currentEditItem.id, this.currentEditItem.option)
+    },
+    setScreenSize(e) {
+      let w = e.slice(0, e.indexOf('*'))
+      let h = e.slice(e.indexOf('*') + 1, e.length)
+      this.globalSetting.editAreaSize.w = w
+      this.globalSetting.editAreaSize.h = h
     }
   }
 }
@@ -404,6 +457,7 @@ export default {
 @outerWidth: 80vw;
 @outerHeight: 90vh;
 @scaleSize: @outerWidth / @editWidth;
+@graphHeight: calc(100vh - 50px);
 .my_page {
   display: flex;
   .leftNav {
@@ -416,21 +470,32 @@ export default {
 .outBox {
   // overflow: scroll;
   padding-left: 364px;
-  // width: 100vw;
+  width: 100vw;
+  height: @graphHeight;
   overflow: hidden;
   position: relative;
   cursor: grab;
   background: url('../../assets/point.png');
   // width: @outerWidth;
   // height: @outerHeight;
+  .visualAnaTit {
+    width: 400px;
+    height: 100px;
+    color: #7ec699;
+    font-size: 2em;
+    position: absolute;
+    left: 50%;
+    margin-left: -200px;
+    top: 30px;
+  }
 
   .editArea {
     // width: 200vw;
     // width: @editWidth;
     // height: @editheight;
+    background-color: rgb(69, 90, 100);
     overflow: hidden;
     transform-origin: left top;
-    border: solid gray 5px;
     position: relative;
     background-repeat: no-repeat;
     background-size: contain;
@@ -440,6 +505,12 @@ export default {
       height: 100%;
     }
   }
+}
+.scaleSlider {
+  width: 200px;
+  position: absolute;
+  bottom: 100px;
+  right: 100px;
 }
 .active {
   background: #eeeeee;
