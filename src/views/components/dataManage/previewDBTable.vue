@@ -6,7 +6,7 @@
       </template>
       <v-divider></v-divider>
       <v-text-field
-        class="rounded-0"
+        class="rounded-0 pt-2"
         elevation="0"
         solo
         dense
@@ -16,12 +16,14 @@
         v-model="searchDBName"
         @click:append="search"
       ></v-text-field>
-      <v-list dense>
+      <v-list dense rounded>
         <v-list-item-group v-model="selectedDataTable" color="primary">
           <v-list-item v-for="item in dataTable" :key="item.text">
-            <v-list-item-content>
-              <v-list-item-title v-text="item[0]"></v-list-item-title>
-            </v-list-item-content>
+            <template v-slot:default="{ active }">
+              <v-list-item-content>
+                <v-list-item-title><v-icon v-if="active">mdi-check-circle</v-icon> {{ item[0] }}</v-list-item-title>
+              </v-list-item-content>
+            </template>
           </v-list-item>
         </v-list-item-group>
       </v-list>
@@ -61,7 +63,7 @@ export default {
         sql_data_id,
         database_name: this.searchDBName,
         query_tables: 1,
-        sql_string: this.searchSqlStr
+        sql_string: ''
       })
         .then(res => {
           if (res.success == 'success') {
@@ -70,7 +72,22 @@ export default {
         })
         .catch(err => {})
     },
-    queryTable() {}
+    queryTable() {
+      const { sql_data_name, sql_data_id } = this.dbInfo
+      query_tables({
+        sql_data_name,
+        sql_data_id,
+        database_name: this.searchDBName,
+        query_tables: 1,
+        sql_string: this.searchSqlStr
+      })
+        .then(res => {
+          if (res.success == 'success') {
+            this.dataTable = res.result
+          }
+        })
+        .catch(err => {})
+    }
   }
 }
 </script>

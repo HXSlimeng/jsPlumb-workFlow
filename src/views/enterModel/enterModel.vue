@@ -121,7 +121,7 @@
         :stateless="true"
         width="490px"
         :expand-on-hover="false"
-        class="pt-14 rightOverlay"
+        class="rightOverlay"
       >
         <template v-slot:prepend>
           <v-list-item>
@@ -260,6 +260,9 @@
                   :items="rightOverlay.info.node_result ? rightOverlay.info.node_result.X : []"
                   :items-per-page="10"
                   class="elevation-1"
+                  disable-sort
+                  @page-count="pageCount = $event"
+                  :page.sync="page"
                 >
                   <template #item="{ item }">
                     <tr>
@@ -267,6 +270,18 @@
                     </tr>
                   </template>
                 </v-data-table>
+                <!-- <div class="text-center pt-2">
+                  <v-pagination v-model="page" :length="pageCount"></v-pagination>
+                  <v-text-field
+                    :value="parseInt(itemsPerPage)"
+                    label="Items per page"
+                    type="number"
+                    min="-1"
+                    v-if="false"
+                    max="15"
+                    @input="itemsPerPage = parseInt($event, 10)"
+                  ></v-text-field>
+                </div> -->
                 <!-- <template #item.one="{ item }">
                     {{item[0]}}
                   </template>
@@ -284,11 +299,88 @@
                 </template>-->
               </v-tab-item>
               <v-tab-item>
-                <Gener-Charts :exeResult="json3d.node_result.X"></Gener-Charts>
+                <!-- <Gener-Charts
+                  ref="genChart"
+                  :exeResult="rightOverlay.info.node_result ? rightOverlay.info.node_result.X : null"
+                ></Gener-Charts> -->
+                <div>
+                  <v-card-title class="text-h6 font-weight-regular justify-space-between">
+                    <span>{{ currentTitle }}</span>
+                    <v-avatar color="primary lighten-2" class="subheading white--text" size="24" v-text="GenerateStep"></v-avatar>
+                  </v-card-title>
+
+                  <v-window v-model="GenerateStep">
+                    <v-window-item :value="1">
+                      <v-radio-group v-model="chartSelected" label="图表选择">
+                        <v-radio v-for="(item, index) in chartOpts" :key="index" :label="item" :value="index"></v-radio>
+                      </v-radio-group>
+                    </v-window-item>
+
+                    <v-window-item :value="2">
+                      <v-radio-group v-model="rowSelected" label="请选择数据列">
+                        <v-radio v-for="(item, index) in getChartsRows()" :key="index" :label="String(item)" :value="index"></v-radio>
+                      </v-radio-group>
+                    </v-window-item>
+
+                    <v-window-item :value="3">
+                      <div class="pa-4 text-center">
+                        <div id="rightOverlayChart"></div>
+                      </div>
+                    </v-window-item>
+                  </v-window>
+
+                  <v-divider></v-divider>
+
+                  <v-card-actions>
+                    <v-btn :disabled="GenerateStep === 1" text @click="GenerateStep--">Back</v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      :disabled="GenerateStep === 3 || (GenerateStep === 2 && this.rowSelected === null)"
+                      color="primary"
+                      depressed
+                      @click="nextStep"
+                      >Next</v-btn
+                    >
+                  </v-card-actions>
+                </div>
               </v-tab-item>
               <v-tab-item>
                 <v-card-title class="my-0 text-h5">数据分析3d散点图</v-card-title>
                 <div id="scatter3D"></div>
+                <v-container fluid>
+                  <v-row align="center">
+                    <v-col class="d-flex" cols="12" sm="4">
+                      <v-select
+                        :items="get3Ditems()"
+                        @change="set3DSource"
+                        dense
+                        outlined
+                        v-model="chart3DSet.firSelc3D"
+                        label="X"
+                      ></v-select>
+                    </v-col>
+                    <v-col class="d-flex" cols="12" sm="4">
+                      <v-select
+                        :items="get3Ditems()"
+                        @change="set3DSource"
+                        dense
+                        outlined
+                        v-model="chart3DSet.secSelc3D"
+                        label="Y"
+                      ></v-select>
+                    </v-col>
+                    <v-col class="d-flex" cols="12" sm="4">
+                      <v-select
+                        :items="get3Ditems()"
+                        @change="set3DSource"
+                        dense
+                        outlined
+                        v-model="chart3DSet.thrSelc3D"
+                        label="Z"
+                      ></v-select>
+                    </v-col>
+                  </v-row>
+                </v-container>
               </v-tab-item>
             </v-tabs-items>
           </div>
@@ -310,16 +402,16 @@ import leftListItem from '../config/leftListItem.json'
 import leftListItem2 from '../config/leftListItem2.json'
 import { saveGraph, runGraph } from '@/request/apis/drawApi.js'
 import { GenNonDuplicateID } from '@/common/until.js'
-import GenerCharts from '@/views/components/rightOverlayEcharts/index'
-
+import chartMixin from '@/mixins/rightCharts.js'
 export default {
   name: 'FlowEdit',
   components: {
-    flowNode,
-    GenerCharts
+    flowNode
   },
+  mixins: [chartMixin],
   data() {
     return {
+      items: [1, 2, 3, 4, 5],
       jsPlumb: null,
       currentItem: null,
       // nodeTypeList: nodeTypeList,
@@ -370,7 +462,8 @@ export default {
         ['fitow_tsne', 'TSNE降维'],
         ['fitow_svm_regression', 'SVM回归'],
         ['fitow_status_describe', '描述性统计分析'],
-        ['fitow_etl_loader', 'ETL算子']
+        ['fitow_etl_loader', 'ETL算子'],
+        ['fitow_sql_object_loader', 'mysql数据源']
       ],
       listMap: {},
       leftBarVis: true,
@@ -448,7 +541,6 @@ export default {
             type: 'category'
           },
           yAxis3D: {
-            name: 'Y轴文字',
             itemStyle: {
               borderColor: '#DC143C',
               backgroundColor: '#DC143C'
@@ -483,7 +575,7 @@ export default {
           },
           dataset: {
             dimensions: ['X轴', 'Y轴', 'Z轴'],
-            source: json3d.node_result.X
+            source: []
           },
           series: [
             {
@@ -516,7 +608,15 @@ export default {
       headers: [],
       testObj: {},
       initialModelData: '',
-      isETLPage: null
+      isETLPage: null,
+      itemsPerPage: 10,
+      page: 1,
+      pageCount: 0,
+      chart3DSet: {
+        firSelc3D: null,
+        secSelc3D: null,
+        thrSelc3D: null
+      }
     }
   },
   created() {
@@ -538,6 +638,7 @@ export default {
     this.listItem = this.isETLPage ? leftListItem2.listitems : leftListItem.listitems
     this.data.graph_param.graph_type = this.isETLPage ? 0 : 1
   },
+  computed: {},
   mounted() {
     // this.initNodeTypeObj()
     this.initNode()
@@ -613,22 +714,31 @@ export default {
         _this.reloadData(JSON.parse(this.result))
       }
     },
+    rightInfoResult() {
+      return this.rightOverlay.info.node_result
+    },
     rightOverylayTabsChange(val) {
-      if (val == 2 && !this.chartInit.barChart && !this.chartInit.pieChart) {
-        setTimeout(() => {
-          let pie = document.getElementById('pieChart')
-          let basicBar = document.getElementById('basicBar')
-          this.chartInit.pieChart = this.$echarts.init(pie)
-          this.chartInit.barChart = this.$echarts.init(basicBar)
-          this.chartInit.pieChart.setOption(this.chartsOpt.pieOption)
-          this.chartInit.barChart.setOption(this.chartsOpt.basicBarOpt)
-        }, 0)
-      } else if (val == 3 && !this.chartInit.scatter3DChart) {
+      if (val == 3 && !this.chartInit.scatter3DChart) {
         setTimeout(() => {
           let scatter3D = document.getElementById('scatter3D')
           this.chartInit.scatter3DChart = this.$echarts.init(scatter3D)
           this.chartInit.scatter3DChart.setOption(this.chartsOpt.scatter3Dopt)
         }, 0)
+      }
+      if (val != 2) {
+        this.GenerateStep = 1
+      }
+    },
+    reload3DchartData() {
+      let result = this.rightOverlay.info.node_result
+      if (result && result.X) {
+        let selectData = result.X.map((v, i) => {
+          return [v[this.chart3DSet.firSelc3D - 1] || i, v[this.chart3DSet.secSelc3D - 1] || i, v[this.chart3DSet.thrSelc3D - 1] || i]
+        })
+        let chart = this.$echarts.getInstanceByDom(document.getElementById('scatter3D'))
+        let option = chart.getOption()
+        option.series[0].data = selectData
+        chart.setOption(option)
       }
     },
     getParentParams(nodeId) {
@@ -659,6 +769,7 @@ export default {
     runAllGraph() {
       runGraph(this.data)
         .then(res => {
+          console.log(res)
           if (res.success == 'OK') {
             this.$message.alertMessage('执行成功!')
           } else {
@@ -689,7 +800,6 @@ export default {
     getHeaders() {
       let tableHeader = null
       let header = null
-      console.log()
       this.rightOverlay.info.node_result
         ? (tableHeader = this.rightOverlay.info.node_result.addtional_node_info.column_names
             ? this.rightOverlay.info.node_result.addtional_node_info.column_names
@@ -704,8 +814,22 @@ export default {
         })
       }
       return header ? header : []
+    },
+    set3DSource() {
+      this.reload3DchartData()
+    },
+    get3Ditems() {
+      let items = []
+      let exeResult = this.rightInfoResult()
+      if (exeResult && exeResult.X && exeResult.X.length) {
+        let rightRes = exeResult.X
+        items = rightRes[0].map((v, i) => i + 1)
+      }
+      items.unshift(false)
+      return items
     }
-  }
+  },
+  watch: {}
 }
 </script>
 
@@ -814,18 +938,19 @@ export default {
     stroke-dashoffset: 0;
   }
 }
-#pieChart {
-  height: 320px;
-  width: 350px;
-  margin: 0 auto;
-}
-#basicBar {
-  #pieChart();
-}
 #scatter3D {
   height: 400px;
   width: 400px;
   margin: 0 auto;
+}
+#rightOverlayChart {
+  height: 320px;
+  width: 350px;
+  margin: 0 auto;
+}
+.rightOverlay {
+  padding-top: 62px;
+  height: calc(100vh - 102px) !important;
 }
 .rightTabs {
   .tabItems {

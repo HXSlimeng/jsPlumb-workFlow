@@ -38,9 +38,10 @@
         </v-card>
       </v-dialog>
       <v-btn outlined color="error" class="ml-2">批量删除</v-btn>
-      <v-dialog v-model="editSourceDialog" max-width="600px">
+      <v-dialog v-model="addSourceDialog" max-width="600px">
         <v-card>
           <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">上传文件</v-card-title>
+
           <div class="inputArea pa-3">
             <v-text-field class="inputItem" outlined dense label="数据源名称" v-model="uploadeFileMess.file_name"></v-text-field>
             <v-text-field class="inputItem" outlined dense label="描述" v-model="uploadeFileMess.file_describe"></v-text-field>
@@ -55,8 +56,33 @@
           </div>
           <v-card-actions>
             <v-spacer></v-spacer>
+            <v-btn @click="addSourceDialog = false">取消</v-btn>
+            <v-btn @click="addFileSource" :loading="addingSource">确定</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="editSourceDialog" max-width="600px">
+        <v-card>
+          <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">编辑数据源</v-card-title>
+          <div class="inputArea pa-3">
+            <v-text-field class="inputItem" outlined dense label="数据源名称" v-model="lookupItem.file_name"></v-text-field>
+            <v-text-field class="inputItem" outlined dense label="描述" v-model="lookupItem.file_describe"></v-text-field>
+          </div>
+          <v-card-actions>
+            <v-spacer></v-spacer>
             <v-btn @click="editSourceDialog = false">取消</v-btn>
-            <v-btn @click="addFileSource">确定</v-btn>
+            <v-btn @click="updateFileSource" :loading="editingSource">确定</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="deleteDialog" max-width="500px">
+        <v-card>
+          <v-card-title class="text-h5">确定要删除该数据源吗？</v-card-title>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="deleteDialog = false">取消</v-btn>
+            <v-btn color="blue darken-1" text @click="deleteItem">确定</v-btn>
+            <v-spacer></v-spacer>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -71,9 +97,9 @@
     >
       <template #item.actions="{ item }">
         <div class="d-flex">
-          <!-- <v-btn color="primary" text>编辑</v-btn> -->
+          <v-btn color="primary" text @click="editeFileSource(item)">编辑</v-btn>
           <!-- <v-btn color="primary" text @click="openLookupDialog(item)">查看</v-btn> -->
-          <v-btn color="primary" text @click="deleteItem(item)">删除</v-btn>
+          <v-btn color="primary" text @click="deleteConfirm(item)">删除</v-btn>
         </div>
       </template>
     </v-data-table>
@@ -96,7 +122,7 @@
 <script>
 import methods from '../../config/methods'
 import { GenNonDuplicateID } from '@/common/until.js'
-import { file_save, file_query, file_delete } from '@/request/apis/dataManageApi.js'
+import { file_save, file_query, file_delete, file_update } from '@/request/apis/dataManageApi.js'
 
 export default {
   data() {
@@ -123,6 +149,7 @@ export default {
           value: 'actions'
         }
       ],
+      addingSource: false,
       dbSource: [],
       searchVal: '',
       selectSourceDialog: false,
@@ -160,17 +187,20 @@ export default {
         fileSelected: null
       },
       editSourceDialog: false,
+      editingSource: false,
+      addSourceDialog: false,
       singleSelect: '',
       lookupSourceDialog: false,
       lookupItem: {},
-      dbSourceFetching: false
+      dbSourceFetching: false,
+      deleteDialog: false
     }
   },
   methods: {
     search() {},
     fileSourceItem(source) {
       this.selectSourceDialog = false
-      this.editSourceDialog = true
+      this.addSourceDialog = true
       this.acceptFileType = source.type
     },
     loadFile(e) {
@@ -188,6 +218,7 @@ export default {
       this.uploadeFileMess.fileSelected = e
     },
     addFileSource() {
+      this.addingSource = true
       let file = this.uploadeFileMess.fileSelected
       let default_kwargs = {
         file_id: GenNonDuplicateID(8),
@@ -205,11 +236,15 @@ export default {
       })
       file_save(formData)
         .then(res => {
-          console.log(res)
-          this.fetchFileSource()
+          if (res.success == 'success') {
+            this.addingSource = false
+            this.addSourceDialog = false
+            this.fetchFileSource()
+          }
         })
         .catch(err => {
-          console.log(err)
+          this.addSourceDialog = false
+          this.addingSource = false
         })
     },
     fetchFileSource() {
@@ -226,21 +261,55 @@ export default {
           this.dbSourceFetching = false
         })
     },
-    deleteItem(item) {
+    deleteItem() {
+      let item = this.lookupItem
       file_delete({ file_id: item.file_id, file_name: item.file_name })
         .then(res => {
           if (res.success == 'success') {
-            this.dbSource = this.dbSource.filter(v => v.file_id != item.file_id)
+            // this.dbSource = this.dbSource.filter(v => v.file_id != item.file_id)
+            this.fetchFileSource()
           }
-          console.log(res)
+          this.deleteDialog = false
         })
         .catch(err => {
           console.log(err)
+          this.deleteDialog = false
         })
     },
     openLookupDialog(item) {
       this.lookupItem = item
       this.lookupSourceDialog = true
+    },
+    deleteConfirm(item) {
+      this.lookupItem = Object.assign({}, item)
+      this.deleteDialog = true
+    },
+    editeFileSource(item) {
+      this.lookupItem = Object.assign({}, item)
+      this.editSourceDialog = true
+    },
+    updateFileSource() {
+      this.editingSource = true
+      const { file_name, file_id, file_describe } = this.lookupItem
+      file_update({
+        file_name,
+        file_id,
+        file_describe
+      })
+        .then(res => {
+          if (res.success == 'success') {
+            this.$message.alertMessage('编辑成功')
+            this.editSourceDialog = false
+            this.fetchFileSource()
+          } else {
+            this.$message.alertMessage(res.exception)
+          }
+          this.editingSource = false
+        })
+        .catch(err => {
+          console.log(err)
+          this.editingSource = false
+        })
     }
   },
   created() {

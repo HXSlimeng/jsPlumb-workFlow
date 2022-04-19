@@ -30,3 +30,9 @@ export function throttle(fn, timeout) {
     }, timeout)
   }
 }
+export function getTimeStr(str) {
+  let year = str.slice(0, 4)
+  let mounth = str.slice(4, 6)
+  let day = str.slice(6, 8)
+  return [year, mounth, day].join('-')
+}

@@ -13,7 +13,10 @@
         <v-tab-item>
           <v-card flat>
             <v-list>
-              <v-list-item-group v-model="selectedItem" color="primary">
+              <v-list-group no-action>
+                <template v-slot:activator>
+                  <v-list-item-title>图表</v-list-item-title>
+                </template>
                 <v-list-item v-for="(item, i) in chartOptList" :key="i" ref="dragItem" @dragstart="currDragType = i">
                   <v-list-item-icon>
                     <svg-icon :icon-class="item.icon" className="chartIcon"></svg-icon>
@@ -22,14 +25,37 @@
                     <v-list-item-title v-text="i"></v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
-              </v-list-item-group>
+              </v-list-group>
+              <v-list-group no-action>
+                <template v-slot:activator>
+                  <v-list-item-title>小组件</v-list-item-title>
+                </template>
+                <v-list-item v-for="(item, i) in specCompOptList" :key="i" ref="dragItem" @dragstart="currDragType = i">
+                  <v-list-item-icon>
+                    <svg-icon :icon-class="item.icon" className="chartIcon"></svg-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content draggable="true">
+                    <v-list-item-title v-text="i"></v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-group>
+              <!-- <v-list-item-group v-model="selectedItem" color="primary">
+                <v-list-item v-for="(item, i) in chartOptList" :key="i" ref="dragItem" @dragstart="currDragType = i">
+                  <v-list-item-icon>
+                    <svg-icon :icon-class="item.icon" className="chartIcon"></svg-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content draggable="true">
+                    <v-list-item-title v-text="i"></v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group> -->
             </v-list>
           </v-card>
         </v-tab-item>
         <v-tab-item>
           <v-card flat class="px-2">
-            <v-subheader>主题选择</v-subheader>
-            <v-select :items="themeItems" outlined dense v-model="themeSelcted"></v-select>
+            <!-- <v-subheader>主题选择</v-subheader>
+            <v-select :items="themeItems" outlined dense v-model="themeSelcted"></v-select> -->
             <v-subheader>画布尺寸</v-subheader>
             <v-select :items="screenSizeItems" v-model="screenSizeSelec" @change="setScreenSize" dense outlined></v-select>
             <!--             <v-text-field suffix="px" dense outlined v-model="globalSetting.editAreaSize.w"></v-text-field>
@@ -137,7 +163,7 @@
     </div>
     <v-dialog v-model="configDialog" width="500">
       <v-card v-if="currentChartOpt">
-        <v-card-title class="text-h5 grey lighten-2">配置图表</v-card-title>
+        <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">配置图表</v-card-title>
         <v-divider></v-divider>
         <div class="ma-5">
           <v-text-field label="图表标题" v-model="currentChartOpt.option.title.text"></v-text-field>
@@ -146,12 +172,7 @@
             <v-radio v-for="(n, i) in dataSource.xAxis" :key="i" :label="`数据源 ${i + 1}`" :value="n"></v-radio>
           </v-radio-group>
           <v-radio-group v-model="currentChartOpt.option.series[0].data" label="数据">
-            <v-radio
-              v-for="(n, i) in dataSource.data"
-              :key="i"
-              :label="`数据源 ${i + 1}${i == 2 ? '(推荐饼图)' : ''}${i == 3 ? '(推荐散点图)' : ''}`"
-              :value="n"
-            ></v-radio>
+            <v-radio v-for="(n, i) in dataSource.data" :key="i" :label="`数据源 ${i + 1}`" :value="n"></v-radio>
           </v-radio-group>
         </div>
         <v-card-actions>
@@ -186,6 +207,7 @@
 <script>
 import { GenNonDuplicateID } from '@/common/until.js'
 import chartOptList from './chartsOptions.js'
+import specCompOptList from './specCompOptions'
 import chartsMethods from './presetCharts.js'
 import dataSource from './dataSource.js'
 import emptyBorder from '@/views/components/emptyBorder/emptyBorder'
@@ -199,6 +221,7 @@ export default {
       currDragType: '',
       initEcharts: [],
       chartOptList: chartOptList,
+      specCompOptList: specCompOptList,
       currentChartOpt: null,
       configDialog: false,
       dataSource: dataSource,
@@ -272,14 +295,45 @@ export default {
   },
   watch: {},
   created() {
-    const { title } = this.$route.params
-    this.globalSetting.title = title
+    window.onbeforeunload = () => {
+      window.sessionStorage.setItem('visualGlobal', JSON.stringify(this.globalSetting))
+      window.sessionStorage.setItem('visualdragble', JSON.stringify(this.draggableItems))
+    }
   },
   mounted() {
     this.dragInit()
     this.setEditAreaSize()
     this.setWheelListener()
     this.setCursor()
+    let modelInfo = this.$route.params.modelInfo
+    console.log(this.$route.params)
+    if (modelInfo) {
+      const { draggableItems, globalSetting } = modelInfo.model_info
+      console.log(draggableItems, globalSetting)
+      this.draggableItems = draggableItems
+      this.globalSetting = globalSetting
+      this.loadCharts()
+    } else {
+      let global = window.sessionStorage.getItem('visualGlobal')
+      let draggable = window.sessionStorage.getItem('visualdragble')
+      if (global && draggable) {
+        this.draggableItems = JSON.parse(draggable)
+        this.globalSetting = JSON.parse(global)
+        this.setGlobalBg()
+        this.draggableItems.forEach(v => {
+          /* v.draggable = false
+      v.resizable = false */
+          if (!v.option.isNotChart) {
+            this.createCharts(v.id, v.option)
+          }
+        })
+      }
+    }
+  },
+  destroyed() {
+    window.onbeforeunload = null
+    window.sessionStorage.removeItem('visualGlobal')
+    window.sessionStorage.removeItem('visualdragble')
   },
   // 方法集合
   methods: {
@@ -313,6 +367,18 @@ export default {
           this.editAreaMatrix.scaleY -= scaleUnit
         }
       })
+      let userAgent = window.navigator.userAgent
+      if (userAgent.includes('Firefox')) {
+        outBox.addEventListener('DOMMouseScroll', e => {
+          if (e.detail < 0) {
+            this.editAreaMatrix.scaleX += scaleUnit
+            this.editAreaMatrix.scaleY += scaleUnit
+          } else {
+            this.editAreaMatrix.scaleX -= scaleUnit
+            this.editAreaMatrix.scaleY -= scaleUnit
+          }
+        })
+      }
     },
     setCursor() {
       let outBox = document.querySelector('.outBox')
@@ -324,7 +390,6 @@ export default {
         if (!e.srcElement.id && e.target.className != 'border-box-content') {
           return
         }
-        console.log(111)
         this.style.cursor = 'grabbing'
         editBox.onmousemove = function wrapMouseout(e) {
           let tarX = e.movementX
@@ -374,11 +439,12 @@ export default {
           active: true,
           type: this.currDragType,
           flag: null,
-          option: this.chartOptList[this.currDragType],
+          option: this.chartOptList[this.currDragType] ? this.chartOptList[this.currDragType] : this.specCompOptList[this.currDragType],
           borderStyle: 'DvBorderBox12'
         }
 
         editCharts.flag = editCharts.id
+        console.log(editCharts)
         if (editCharts.option.isNotChart) {
           this.draggableItems.push(editCharts)
         } else {
@@ -387,12 +453,7 @@ export default {
         }
       })
     },
-    setGlobalBg() {
-      let editMain = document.getElementById('editMain')
-      let bgColor = this.globalSetting.themeBgColor
-      let bgImage = `url(${this.globalSetting.themeBgImage}) no-repeat`
-      editMain.style.background = this.globalSetting.bgModeSelc == 'color' ? bgColor : bgImage
-    },
+
     //
     logMessage() {
       console.log(this.draggableItems)
@@ -431,11 +492,16 @@ export default {
       this.configDialog = false
     },
     previewCharts() {
-      window.localStorage.setItem('chartsItem', JSON.stringify({ dragItems: this.draggableItems, globalSetting: this.globalSetting }))
+      window.localStorage.setItem('chartsItem', JSON.stringify({ draggableItems: this.draggableItems, globalSetting: this.globalSetting }))
       const { href } = this.$router.resolve({
         name: 'previewChartsTest'
       })
-      window.open(href, '_blank', 'menubar=no,toolbar=no,status=no,scrollbars=false')
+      window.open(
+        href,
+        '_blank',
+        `menubar=no,toolbar=no,status=no,scrollbars=false,height=${window.screen.availHeight - 30},width=${window.screen.availWidth -
+          10},location=no,top=0,left=0`
+      )
     },
     borderStyleChange() {
       this.createCharts(this.currentEditItem.id, this.currentEditItem.option)

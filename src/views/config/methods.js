@@ -353,7 +353,6 @@ const methods = {
       }, 200)
     }
     this.headers = headers
-    console.log(this.headers)
   },
   setListDisable(str) {
     this.listItem.map(v => {

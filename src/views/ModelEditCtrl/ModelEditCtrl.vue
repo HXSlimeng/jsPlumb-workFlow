@@ -45,7 +45,7 @@
           </v-card>
         </v-dialog>
         <v-btn outlined color="error">批量删除</v-btn>
-        <v-btn outlined>刷新</v-btn>
+        <v-btn outlined><v-icon left>mdi-refresh</v-icon>刷新</v-btn>
       </div>
     </div>
 
@@ -106,6 +106,9 @@
           </v-dialog>
         </template>
 
+        <template #item.create_time="{ item }">
+          {{ getTimeStr(item.create_time) }}
+        </template>
         <template #item.actions="{ item }">
           <div class="d-flex editBtns">
             <v-btn @click="enterViewModel(item, 'MODEL')" text color="primary" dark>模型编辑</v-btn>
@@ -126,7 +129,7 @@
           </v-btn>
         </template>
       </v-data-table>
-      <div class="text-center pt-2">
+      <!-- <div class="text-center pt-2">
         <v-pagination v-model="page" :length="pageCount"></v-pagination>
         <v-text-field
           :value="itemsPerPage"
@@ -137,14 +140,14 @@
           max="15"
           @input="itemsPerPage = parseInt($event, 10)"
         ></v-text-field>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
 import datalist from '../config/data.json'
-import { GenNonDuplicateID } from '@/common/until.js'
+import { GenNonDuplicateID, getTimeStr } from '@/common/until.js'
 import { searchGraph, editGraph } from '@/request/apis/drawApi.js'
 import editModelMixin from '@/mixins/editModel.js'
 
@@ -222,7 +225,8 @@ export default {
           this.dataLifetching = false
         })
     },
-    search() {}
+    search() {},
+    getTimeStr: getTimeStr
   },
   created() {
     this.fetchModelList()

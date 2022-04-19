@@ -39,31 +39,32 @@
               v-model="sqlSelect"
               item-text="sql_data_name"
               return-object
+              outlined
               @change="setDataParam"
               label="选择数据库"
             ></v-select>
-            <div v-for="(config, key) in node.train_params" :key="key">
-              <v-text-field
-                v-if="getSpecTrainConfig(nodeParams.node_type, key)"
-                :label="key"
-                v-model="node.train_params[key]"
-                required
-                outlined
-                height="10px"
-              ></v-text-field>
-            </div>
           </div>
-          <div v-else>
-            <div v-for="(config, key) in node.train_params" :key="key">
-              <v-text-field
-                v-if="key.indexOf('_file') == -1 && key != 'additional_run_kwargs'"
-                :label="key"
-                v-model="node.train_params[key]"
-                required
-                outlined
-                height="10px"
-              ></v-text-field>
-            </div>
+          <!-- 配置ETL算子单独参数 -->
+          <div v-else-if="nodeParams.node_type == 'fitow_etl_loader'">
+            <v-select
+              :items="etlSourceItem"
+              v-model="etlSelect"
+              item-text="graph_name"
+              return-object
+              outlined
+              @change="setEtlParam"
+              label="选择ETL数据源"
+            ></v-select>
+          </div>
+          <div v-for="(config, key) in node.train_params" :key="key">
+            <v-text-field
+              v-if="getSpecTrainConfig(nodeParams.node_type, key)"
+              :label="key"
+              v-model="node.train_params[key]"
+              required
+              outlined
+              height="10px"
+            ></v-text-field>
           </div>
           <span class="text-h6">op_params</span>
           <v-divider class="my-3"></v-divider>
@@ -122,7 +123,7 @@
 </template>
 
 <script>
-import { nodeResult, runGraph } from '@/request/apis/drawApi.js'
+import { nodeResult, runGraph, searchGraph } from '@/request/apis/drawApi.js'
 import ClickOutside from 'vue-click-outside'
 import json3d from '@/views/config/json3d.json'
 import { sql_query } from '@/request/apis/dataManageApi.js'
@@ -151,6 +152,12 @@ export default {
     },
     nodeParams() {
       return this.node.node_params
+    },
+    hasResult() {
+      return this.node.node_result && this.node.node_result.X
+    },
+    exeHasFinish() {
+      return this.node.node_exec_state
     }
   },
   data() {
@@ -205,7 +212,10 @@ export default {
       ],
       /* sql数据源配置 */
       sqlSourceItem: [],
-      sqlSelect: null
+      sqlSelect: null,
+      /* etl算子配置 */
+      etlSourceItem: [],
+      etlSelect: null
     }
   },
   methods: {
@@ -270,7 +280,6 @@ export default {
       if (this.isActive) {
         return
       } else {
-        console.log(this.headers)
         this.$emit('ctlRightOverLay', this.node, this.isActive, this.headers)
       }
       this.isActive = true
@@ -327,8 +336,6 @@ export default {
           this.setTableHeader()
           this.node.node_exec_state = node_exec_state
           if (res.node_exec_state.state_id == 0) {
-            console.log(this.headers)
-
             this.$emit('ctlRightOverLay', this.node, this.isActive, this.headers)
             // this.$nextTick(()=>{
             //   this.$parent.jsPlumb.makeTarget(this.nodeParams.node_id, this.$parent.jsplumbTargetOptions);
@@ -428,8 +435,15 @@ export default {
             valid = false
           }
           break
-
+        case 'fitow_etl_loader':
+          if (paramKey == 'graph_name' || paramKey == 'graph_id') {
+            valid = false
+          }
+          break
         default:
+          if (paramKey.indexOf('_file') != -1 || paramKey == 'additional_run_kwargs') {
+            valid = false
+          }
           break
       }
       return valid
@@ -445,10 +459,29 @@ export default {
           console.log(err)
         })
     },
+    fetchEtlSource() {
+      searchGraph({ graph_type: 0, graph_state: 0 })
+        .then(res => {
+          if (res.sate_id == 0) {
+            this.etlSourceItem = res.models.map(v => {
+              return {
+                graph_name: v.graph_name,
+                graph_id: v.graph_id
+              }
+            })
+          }
+        })
+        .catch(err => {})
+    },
     setDataParam() {
       const { sql_data_id, sql_data_name } = this.sqlSelect
       this.node.train_params.sql_data_id = sql_data_id
       this.node.train_params.sql_data_name = sql_data_name
+    },
+    setEtlParam(e) {
+      const { graph_name, graph_id } = e
+      this.node.train_params.graph_name = graph_name
+      this.node.train_params.graph_id = graph_id
     },
     setTableHeader() {
       let tableHeader = null
@@ -461,12 +494,42 @@ export default {
           }
         })
       }
+    },
+    setNodeStatus() {
+      if (this.exeHasFinish) {
+        switch (this.node.node_exec_state.state_id) {
+          case 0:
+            this.nodeStatus = 1
+            break
+          case -1:
+            this.nodeStatus = 3
+            break
+          default:
+            break
+        }
+      } else {
+        this.nodeStatus = 0
+      }
+    },
+    sourceSpecConfig() {
+      let nodeType = this.nodeParams.node_type
+      switch (nodeType) {
+        case 'fitow_sql_object_loader':
+          this.fetchSqlSource()
+          break
+        case 'fitow_etl_loader':
+          this.fetchEtlSource()
+          break
+        default:
+          break
+      }
     }
   },
   mounted() {},
   created() {
-    this.nodeParams.node_type == 'fitow_sql_object_loader' && this.fetchSqlSource()
+    this.sourceSpecConfig()
     this.setTableHeader()
+    this.setNodeStatus()
     /* if (this.nodeParams.submit && !this.node.node_result) {
       this.nodeParams.disabled = true;
     } */
@@ -484,6 +547,12 @@ export default {
 @labelColor: #409eff;
 @nodeSize: 15px;
 @viewSize: 10px;
+.endPointDot {
+  width: 8px;
+  height: 8px;
+  position: relative;
+  z-index: 2;
+}
 .node-item {
   position: absolute;
   display: flex;
@@ -496,7 +565,7 @@ export default {
   border-radius: 4px;
   cursor: move;
   box-sizing: content-box;
-  z-index: 9995;
+  // z-index: 9995;
   background-color: rgba(0, 82, 217, 0.3);
   &::after {
     content: '';
@@ -532,14 +601,15 @@ export default {
   .node-anchor {
     display: flex;
     position: absolute;
-    width: @nodeSize;
-    height: @nodeSize;
+    width: 8px;
+    height: 8px;
     align-items: center;
     justify-content: center;
-    border-radius: 2px;
+    border-radius: 11px;
+    border: solid 3px #8f8f8f;
     cursor: crosshair;
     z-index: 9999;
-    background: rgb(25, 52, 65);
+    background: #d3d3d3;
   }
   .anchor-top {
     top: calc((@nodeSize / 2) * -1);

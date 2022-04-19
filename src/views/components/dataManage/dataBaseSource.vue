@@ -71,12 +71,15 @@
               v-model="newSqlSource.sql_data_ip"
             ></v-text-field>
             <v-text-field class="inputItem" outlined dense label="端口" v-model="newSqlSource.sql_data_port"></v-text-field>
-            <v-btn class="mt-n5 mb-2" color="primary" style="position: absolute; right: 10px;" @click="connectTest">测试链接</v-btn>
+            <v-btn class="mt-n5 mb-2" color="primary" style="position: absolute; right: 10px;" @click="connectTest" :loading="testing"
+              >测试链接</v-btn
+            >
             <v-text-field class="inputItem mt-5" outlined dense label="用户名" v-model="newSqlSource.sql_data_user"></v-text-field>
             <v-text-field class="inputItem" outlined dense label="密码" v-model="newSqlSource.sql_data_password"></v-text-field>
           </div>
-          <v-card-actions class="d-flex justify-center pb-7">
-            <v-btn @click="editSourceDialog = false" class="mr-8">取消</v-btn>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="editSourceDialog = false">取消</v-btn>
             <v-btn color="primary" @click="addSqlSource" :loading="adding">确定</v-btn>
           </v-card-actions>
         </v-card>
@@ -129,6 +132,10 @@
           <v-text-field outlined dense label="用户名" v-model="lookupItem.sql_data_user"></v-text-field>
           <v-text-field outlined dense label="密码" v-model="lookupItem.sql_data_password"></v-text-field>
         </v-card-text>
+        <v-card-actions class="d-flex justify-center">
+          <v-btn color="primary" @click="editDbSourceDialog = false">取消</v-btn>
+          <v-btn color="primary" @click="updateDbSource" :loading="updating">确认</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
     <v-dialog v-model="dialogDelete" max-width="500px">
@@ -150,7 +157,7 @@ import methods from '../../config/methods'
 import SvgIcon from '../svgComp/SvgIcon.vue'
 import { GenNonDuplicateID } from '@/common/until.js'
 
-import { sql_query, sql_save, sql_delete, connect_test, query_tables } from '@/request/apis/dataManageApi.js'
+import { sql_query, sql_save, sql_delete, connect_test, query_tables, sql_update } from '@/request/apis/dataManageApi.js'
 
 export default {
   components: { SvgIcon },
@@ -270,7 +277,9 @@ export default {
       adding: false,
       sqlSourceFetching: false,
       dialogDelete: false,
-      deleting: false
+      deleting: false,
+      updating: false,
+      testing: false
     }
   },
   methods: {
@@ -342,8 +351,24 @@ export default {
         })
     },
     editDbSource(item) {
-      this.lookupItem = item
+      this.lookupItem = Object.assign({}, item)
       this.editDbSourceDialog = true
+    },
+    updateDbSource() {
+      this.updating = true
+      sql_update(this.lookupItem)
+        .then(res => {
+          if (res.success == 'success') {
+            this.$message.alertMessage('修改成功')
+          } else {
+            this.$message.alertMessage(res.success)
+          }
+          this.updating = false
+        })
+        .catch(err => {
+          this.updating = false
+          this.$message.alertMessage(err)
+        })
     },
     addSqlSource() {
       this.adding = true
@@ -375,6 +400,7 @@ export default {
     },
     connectTest() {
       const { sql_data_user, sql_data_password, sql_data_ip, sql_data_port } = this.newSqlSource
+      this.testing = true
       connect_test({
         sql_data_user,
         sql_data_password,
@@ -382,10 +408,15 @@ export default {
         sql_data_port
       })
         .then(res => {
-          console.log(res)
+          if (res.connect_state == 0) {
+            this.$message.alertMessage('测试成功！！！')
+          } else {
+            this.$message.alertMessage('测试不通！！！')
+          }
+          this.testing = false
         })
         .catch(err => {
-          console.log(err)
+          this.testing = false
         })
     }
   },

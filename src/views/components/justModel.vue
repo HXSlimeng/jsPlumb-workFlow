@@ -1,12 +1,6 @@
 <template>
   <div class="flow_region">
-    <div
-      id="flowWrap"
-      ref="flowWrap"
-      class="flow-wrap"
-      @drop="drop($event)"
-      @dragover="allowDrop($event)"
-    >
+    <div id="flowWrap" ref="flowWrap" class="flow-wrap" @drop="drop($event)" @dragover="allowDrop($event)">
       <slot :headerInfo="data.graph_param"></slot>
       <!-- <v-subheader class="text-h5" style="color: #00695c">
         {{ data.graph_param.graph_name }}
@@ -18,7 +12,7 @@
           :style="{
             width: auxiliaryLinePos.width,
             top: auxiliaryLinePos.y + 'px',
-            left: auxiliaryLinePos.offsetX + 'px',
+            left: auxiliaryLinePos.offsetX + 'px'
           }"
         ></div>
         <div
@@ -27,7 +21,7 @@
           :style="{
             height: auxiliaryLinePos.height,
             left: auxiliaryLinePos.x + 'px',
-            top: auxiliaryLinePos.offsetY + 'px',
+            top: auxiliaryLinePos.offsetY + 'px'
           }"
         ></div>
         <v-dialog v-model="showDelDialog">
@@ -38,9 +32,7 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="showDelDialog = false"
-                >I accept</v-btn
-              >
+              <v-btn color="primary" text @click="showDelDialog = false">I accept</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -63,30 +55,25 @@
 </template>
 
 <script>
-import { datalist } from "../config/data.json";
-import { jsPlumb } from "jsplumb";
-import {
-  jsplumbSetting,
-  jsplumbConnectOptions,
-  jsplumbSourceOptions,
-  jsplumbTargetOptions,
-} from "../config/commonConfig";
-import methods from "../config/methods";
-import flowNode from "./node-item";
+import { datalist } from '../config/data.json'
+import { jsPlumb } from 'jsplumb'
+import { jsplumbSetting, jsplumbConnectOptions, jsplumbSourceOptions, jsplumbTargetOptions } from '../config/commonConfig'
+import methods from '../config/methods'
+import flowNode from './node-item'
 export default {
   components: {
-    flowNode,
+    flowNode
   },
   data() {
     return {
       data: {
         graph_param: {
-          graph_name: "demo_graph",
-          graph_id: "graph_index_1",
-          grap_type: "json_graph",
+          graph_name: 'demo_graph',
+          graph_id: 'graph_index_1',
+          grap_type: 'json_graph'
         },
         nodeList: [],
-        lineList: [],
+        lineList: []
       },
       jsplumbSetting: jsplumbSetting,
       jsplumbConnectOptions: jsplumbConnectOptions,
@@ -94,141 +81,141 @@ export default {
       jsplumbTargetOptions: jsplumbTargetOptions,
       auxiliaryLine: { isShowXLine: false, isShowYLine: false }, //对齐辅助线是否显示
       auxiliaryLinePos: {
-        width: "100%",
-        height: "100%",
+        width: '100%',
+        height: '100%',
         offsetX: 0,
         offsetY: 0,
         x: 20,
-        y: 20,
+        y: 20
       },
       commonGrid: [5, 5], //节点移动最小距离
       selectModuleFlag: false, //多选标识
       rectAngle: {
-        px: "", //多选框绘制时的起始点横坐标
-        py: "", //多选框绘制时的起始点纵坐标
+        px: '', //多选框绘制时的起始点横坐标
+        py: '', //多选框绘制时的起始点纵坐标
         left: 0,
         top: 0,
         height: 0,
-        width: 0,
+        width: 0
       },
       showDelDialog: false,
       listTypeMap: [
-        ["fitow_csv_loader", "CSV文件读取"],
-        ["fitow_xlsx_loader", "EXCEL文件读取"],
-        ["fitow_standard_scaler", "01标准化"],
-        ["fitow_min_max_scaler", "极值标准化"],
-        ["fitow_data_slicer", "数据切片"],
-        ["fitow_linear_regression", "线性回归算法"],
-        ["fitow_kmeans", "Kmeans聚类"],
-        ["fitow_pca", "PCA降维"],
-        ["fitow_tsne", "TSNE降维"],
-        ["fitow_svm_regression", "SVM回归"],
-        ["fitow_status_describe", "描述性统计分析"],
-      ],
-    };
+        ['fitow_csv_loader', 'CSV文件读取'],
+        ['fitow_xlsx_loader', 'EXCEL文件读取'],
+        ['fitow_standard_scaler', '01标准化'],
+        ['fitow_min_max_scaler', '极值标准化'],
+        ['fitow_data_slicer', '数据切片'],
+        ['fitow_linear_regression', '线性回归算法'],
+        ['fitow_kmeans', 'Kmeans聚类'],
+        ['fitow_pca', 'PCA降维'],
+        ['fitow_tsne', 'TSNE降维'],
+        ['fitow_svm_regression', 'SVM回归'],
+        ['fitow_status_describe', '描述性统计分析']
+      ]
+    }
   },
   created() {
-    this.listMap = new Map(this.listTypeMap);
+    this.listMap = new Map(this.listTypeMap)
 
-    this.jsPlumb = jsPlumb.getInstance();
-    let modelInfo = this.$route.params.modelInfo;
+    this.jsPlumb = jsPlumb.getInstance()
+    let modelInfo = this.$route.params.modelInfo
     modelInfo = {
       graph_param: {
-        graph_name: "测试",
-        graph_id: "1zsp5rclplpc00",
-        graph_message: "",
-        graph_createTim: "2022-01-14",
-        graph_type: "json_graph",
+        graph_name: '测试',
+        graph_id: '1zsp5rclplpc00',
+        graph_message: '',
+        graph_createTim: '2022-01-14',
+        graph_type: 'json_graph'
       },
-      create_time: "",
+      create_time: '',
       nodeList: [
         {
           node_params: {
-            node_type: "fitow_csv_loader",
-            node_name: "csv_loader",
-            node_id: "3ewzjdpe0eo000",
+            node_type: 'fitow_csv_loader',
+            node_name: 'csv_loader',
+            node_id: '3ewzjdpe0eo000',
             dependency: [],
             submit: true,
-            stage: "train",
+            stage: 'train',
             last: false,
-            top: "120px",
-            left: "85px",
+            top: '120px',
+            left: '85px'
           },
           resource_params: {},
           op_params: {},
           train_params: {
-            csv_file: "./client_demo/data/iris.data",
-            submit_result: true,
+            csv_file: './client_demo/data/iris.data',
+            submit_result: true
           },
-          predict_params: {},
+          predict_params: {}
         },
         {
           node_params: {
-            node_type: "fitow_csv_loader",
-            node_name: "csv_loader",
-            node_id: "hjd4apo5kqw00",
+            node_type: 'fitow_csv_loader',
+            node_name: 'csv_loader',
+            node_id: 'hjd4apo5kqw00',
             dependency: [],
             submit: true,
-            stage: "train",
+            stage: 'train',
             last: false,
-            top: "135px",
-            left: "360px",
+            top: '135px',
+            left: '360px'
           },
           resource_params: {},
           op_params: {},
           train_params: {
-            csv_file: "./client_demo/data/iris.data",
-            submit_result: true,
+            csv_file: './client_demo/data/iris.data',
+            submit_result: true
           },
-          predict_params: {},
-        },
+          predict_params: {}
+        }
       ],
       lineList: [
         {
-          from: "3ewzjdpe0eo000",
-          to: "hjd4apo5kqw00",
-          label: "连线名称",
-          id: "3a13zz2npuw000",
-          Remark: "",
-        },
-      ],
-    };
-    modelInfo = datalist[0];
-    console.log(modelInfo);
+          from: '3ewzjdpe0eo000',
+          to: 'hjd4apo5kqw00',
+          label: '连线名称',
+          id: '3a13zz2npuw000',
+          Remark: ''
+        }
+      ]
+    }
+    modelInfo = datalist[0]
+    console.log(modelInfo)
     if (modelInfo) {
-      this.reloadData(modelInfo);
-      this.initialModelData = JSON.parse(JSON.stringify(modelInfo));
+      this.reloadData(modelInfo)
+      this.initialModelData = JSON.parse(JSON.stringify(modelInfo))
     }
   },
   mounted() {
-    this.fixNodesPosition();
+    this.fixNodesPosition()
     this.$nextTick(() => {
-      this.init();
-    });
+      this.init()
+    })
   },
   methods: {
     ...methods,
     reloadData(innerData) {
-      this.jsPlumb.reset();
-      this.data.lineList = [];
-      this.data.nodeList = [];
+      this.jsPlumb.reset()
+      this.data.lineList = []
+      this.data.nodeList = []
       //深拷贝json数据
-      let dataD = JSON.parse(JSON.stringify(innerData));
-      this.data = dataD;
+      let dataD = JSON.parse(JSON.stringify(innerData))
+      this.data = dataD
       /* this.data.lineList = dataD.lineList;
       dataD.nodeList.map(v => {
         this.data.nodeList.push(v)
       }) */
-      this.fixNodesPosition();
+      this.fixNodesPosition()
       this.$nextTick(() => {
-        this.init();
-      });
+        this.init()
+      })
     },
     getNameByNodeType(type) {
-      return this.listMap.get(type);
-    },
-  },
-};
+      return this.listMap.get(type)
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>

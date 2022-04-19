@@ -64,6 +64,9 @@
         <v-btn text color="primary">编辑</v-btn>
         <v-btn text color="primary" @click="deleteItem(item)">删除</v-btn>
       </template>
+      <template #item.create_time="{ item }">
+        {{ getTimeStr(item.create_time) }}
+      </template>
     </v-data-table>
     <v-dialog v-model="dialogDelete" max-width="500px">
       <v-card>
@@ -82,6 +85,7 @@
 <script>
 import editModelMixin from '@/mixins/editModel.js'
 import { searchGraph, editGraph, delGraph } from '@/request/apis/drawApi.js'
+import { getTimeStr } from '@/common/until.js'
 
 export default {
   mixins: [editModelMixin],
@@ -129,6 +133,7 @@ export default {
       })
     },
     search() {},
+    getTimeStr: getTimeStr,
     fetchEtlList() {
       this.etlLoading = true
       searchGraph({ graph_type: 0, graph_state: 0 })
