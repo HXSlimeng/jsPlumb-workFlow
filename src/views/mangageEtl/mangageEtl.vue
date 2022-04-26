@@ -56,8 +56,11 @@
       :single-select="singleSelect"
       show-select
       :loading="etlLoading"
+      hide-default-footer
+      @page-count="pageCount = $event"
+      :page.sync="page"
     >
-      <template #item.actions="{ item }">
+      <template #item.actions="{ item }" class="d-flex justify-center">
         <v-btn text color="primary" @click="enterViewModel(item, 'ETL')">ETL编辑</v-btn>
         <v-btn text color="primary" @click="publishETL(item)">发布</v-btn>
         <v-btn text color="primary">导出</v-btn>
@@ -68,6 +71,7 @@
         {{ getTimeStr(item.create_time) }}
       </template>
     </v-data-table>
+    <v-pagination v-model="page" :length="pageCount"></v-pagination>
     <v-dialog v-model="dialogDelete" max-width="500px">
       <v-card>
         <v-card-title class="text-h5">确定要删除该模型吗？</v-card-title>
@@ -91,29 +95,37 @@ export default {
   mixins: [editModelMixin],
   data() {
     return {
+      page: 1,
+      pageCount: 10,
       etlHeader: [
         {
           text: '名称',
+          align: 'center',
           value: 'graph_name'
         },
         {
           text: '描述',
+          align: 'center',
           value: 'graph_describe'
         },
         {
           text: '状态',
+          align: 'center',
           value: 'status'
         },
         {
           text: '源表',
+          align: 'center',
           value: 'sourceTable'
         },
         {
           text: '最后修改时间',
+          align: 'center',
           value: 'create_time'
         },
         {
           text: '操作',
+          align: 'center',
           value: 'actions'
         }
       ],

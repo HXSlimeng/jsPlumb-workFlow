@@ -42,6 +42,7 @@
     "vue-cli-plugin-axios": "^0.0.4",
     "vue-cli-plugin-vuetify": "^2.4.5",
     "vue-template-compiler": "^2.6.11",
+    "vue2-ace-editor": "^0.0.15",
     "vuetify-loader": "^1.7.0",
     "webpack-bundle-analyzer": "^4.5.0"
   }

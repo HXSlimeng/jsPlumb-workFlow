@@ -1,8 +1,8 @@
 import { debounce } from '@/common/until.js'
 const chartsMethods = {
   onResize: debounce(function(x, y, width, height) {
-    let activeItem = this.draggableItems.find(v => v.active)
-    if (!activeItem.option.isNotChart) {
+    let activeItem = this.activeItem
+    if (!activeItem.option.isNotChart && !activeItem.option.isText) {
       let init = this.initEcharts.find(v => v.id == activeItem.id)
       init.init.resize()
     }
@@ -10,18 +10,22 @@ const chartsMethods = {
     activeItem.y = y
     activeItem.width = width
     activeItem.height = height
-    this.$refs[activeItem.id][0].initWH()
+    //dataV样式重新调整大小
+    if (!activeItem.option.isText) {
+      this.$refs[activeItem.id][0].initWH()
+    }
     /* this.$nextTick(() => {
       activeItem.flag = activeItem.flag.length == 14 ? activeItem.flag + '1' : activeItem.flag.slice(0, 14)
     }) */
   }, 100),
-  onDrag: function(x, y) {
-    let activeItem = this.draggableItems.find(v => v.active)
-    activeItem.x = x
-    activeItem.y = y
-  },
+  onDrag: debounce(function(x, y) {
+    // let activeItem = this.draggableItems.find(v => v.active)
+    console.log(111)
+    this.activeItem.x = x
+    this.activeItem.y = y
+  }, 0),
   setActive(dragItem) {
-    this.currentEditItem = dragItem
+    this.currentEditItem = JSON.parse(JSON.stringify(dragItem))
     this.draggableItems.forEach(v => {
       v.active = false
     })
@@ -59,11 +63,18 @@ const chartsMethods = {
     this.draggableItems.forEach(v => {
       /* v.draggable = false
       v.resizable = false */
-      if (!v.option.isNotChart) {
+      if (!v.option.isNotChart && !v.option.isText) {
         this.createCharts(v.id, v.option)
       }
     })
     // this.setGlobalBg
+  },
+  getTextStyle(item) {
+    const { option } = item
+    return {
+      color: option.color,
+      fontSize: `${option.fontSize}px`
+    }
   }
 }
 export default chartsMethods

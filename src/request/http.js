@@ -22,6 +22,7 @@ axios.create({
   timeout: 1000 //请求超时时间
   // responseType:"arraybuffer"  返回的数据格式
 })
+axios.defaults.timeout = 5000
 
 //  request请求拦截器
 axios.interceptors.request.use(

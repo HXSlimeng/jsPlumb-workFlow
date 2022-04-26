@@ -32,15 +32,16 @@
       <v-data-table
         v-model="selected"
         @page-count="pageCount = $event"
+        :page.sync="page"
         :headers="modelHeaders"
         :items="dataVItems"
         :single-select="singleSelect"
         show-select
         disable-sort
         item-key="model_id"
-        :page.sync="page"
         :loading="dataLifetching"
         loading-text="数据加载中"
+        hide-default-footer
       >
         <template v-slot:top>
           <v-dialog v-model="editDialog" max-width="500px">
@@ -86,7 +87,7 @@
         </template>
 
         <template #item.actions="{ item }">
-          <div class="d-flex editBtns">
+          <div class="d-flex justify-center editBtns">
             <v-btn @click="enterDatav(item)" color="teal darken-1" dark>编辑模型</v-btn>
             <v-btn @click="previewCharts(item)" color="teal darken-1" dark>预览效果</v-btn>
             <v-btn color="teal darken-1" dark>编辑</v-btn>
@@ -102,15 +103,6 @@
       </v-data-table>
       <div class="text-center pt-2">
         <v-pagination v-model="page" :length="pageCount"></v-pagination>
-        <v-text-field
-          :value="itemsPerPage"
-          label="Items per page"
-          type="number"
-          min="-1"
-          v-if="false"
-          max="15"
-          @input="itemsPerPage = parseInt($event, 10)"
-        ></v-text-field>
       </div>
     </div>
   </div>
@@ -133,12 +125,12 @@ export default {
       modelHeaders: [
         {
           text: '可视化名称',
-          align: 'start',
+          align: 'center',
           value: 'model_info.globalSetting.title'
         },
-        { text: '创建时间', value: 'createTime' },
-        { text: '最后修改时间', value: 'lastChangeTime' },
-        { text: '操作', value: 'actions' }
+        { text: '创建时间', align: 'center', value: 'createTime' },
+        { text: '最后修改时间', align: 'center', value: 'lastChangeTime' },
+        { text: '操作', align: 'center', value: 'actions' }
       ],
       dataVItems: [
         {
@@ -150,10 +142,10 @@ export default {
             draggableItems: [
               {
                 id: '2hciksdeklq000',
-                width: 754,
-                height: 343,
-                x: 26,
-                y: 701,
+                width: 685,
+                height: 244,
+                x: 88,
+                y: 778,
                 active: false,
                 type: '轮播表',
                 flag: '2hciksdeklq000',
@@ -180,10 +172,10 @@ export default {
               },
               {
                 id: '3vnrk36aw54000',
-                width: 879,
+                width: 806,
                 height: 200,
-                x: 1019,
-                y: 849,
+                x: 1114,
+                y: 798,
                 active: false,
                 type: '胶囊图',
                 flag: '3vnrk36aw54000',
@@ -222,8 +214,8 @@ export default {
                 id: '1xp63fz8sydc00',
                 width: 797,
                 height: 259,
-                x: 21,
-                y: 251,
+                x: 67,
+                y: 271,
                 active: false,
                 type: '散点图',
                 flag: '1xp63fz8sydc00',
@@ -273,8 +265,8 @@ export default {
                 id: '1oue4v4437ts00',
                 width: 846,
                 height: 225,
-                x: 1029,
-                y: 500,
+                x: 1050,
+                y: 504,
                 active: false,
                 type: '柱形图',
                 flag: '1oue4v4437ts00',
@@ -308,10 +300,10 @@ export default {
               },
               {
                 id: '5obr80efzow000',
-                width: 607,
+                width: 457,
                 height: 324,
-                x: 1267,
-                y: 106,
+                x: 1430,
+                y: 173,
                 active: false,
                 type: '饼状图',
                 flag: '5obr80efzow000',
@@ -363,11 +355,115 @@ export default {
                   icon: 'chartPie'
                 },
                 borderStyle: 'DvBorderBox12'
+              },
+              {
+                id: '3z5p2cafafm000',
+                width: 653,
+                height: 199,
+                x: 99,
+                y: 546,
+                active: false,
+                type: 'dvDecoration1',
+                flag: '3z5p2cafafm000',
+                option: {
+                  icon: 'chartLine',
+                  isNotChart: true,
+                  config: {},
+                  compName: 'dv-decoration-1'
+                },
+                borderStyle: 'DvBorderBox12'
+              },
+              {
+                id: '2lclg4ex6zy000',
+                width: 200,
+                height: 200,
+                x: 536,
+                y: 441,
+                active: false,
+                type: 'dvDecoration10',
+                flag: '2lclg4ex6zy000',
+                option: {
+                  icon: 'chartLine',
+                  isNotChart: true,
+                  config: {},
+                  compName: 'dv-decoration-10'
+                },
+                borderStyle: 'DvBorderBox12'
+              },
+              {
+                id: '4zlhbqe54ac000',
+                width: 189,
+                height: 190,
+                x: 845,
+                y: 830,
+                active: false,
+                type: 'dvDecoration12',
+                flag: '4zlhbqe54ac000',
+                option: {
+                  icon: 'chartLine',
+                  isNotChart: true,
+                  config: {},
+                  compName: 'dv-decoration-12'
+                },
+                borderStyle: 'DvBorderBox12'
+              },
+              {
+                id: '19k37v6diry800',
+                width: 380,
+                height: 52,
+                x: 163,
+                y: 38,
+                active: false,
+                type: '文字',
+                flag: '19k37v6diry800',
+                option: {
+                  icon: 'chartLine',
+                  isText: true,
+                  text: '数据大屏测试',
+                  color: 'rgb(162, 203, 239)',
+                  fontSize: '36'
+                },
+                borderStyle: 'DvBorderBox12'
+              },
+              {
+                id: '4qmaylzjdhq000',
+                width: 404,
+                height: 60,
+                x: 1457,
+                y: 24,
+                active: false,
+                type: '文字',
+                flag: '4qmaylzjdhq000',
+                option: {
+                  icon: 'chartLine',
+                  isText: true,
+                  text: '测试文字',
+                  color: 'rgb(162, 203, 111)',
+                  fontSize: '36'
+                },
+                borderStyle: 'DvBorderBox12'
+              },
+              {
+                id: '1lhhdi89lnnk00',
+                width: 280,
+                height: 163,
+                x: 1138,
+                y: 252,
+                active: false,
+                type: 'dvDecoration6',
+                flag: '1lhhdi89lnnk00',
+                option: {
+                  icon: 'chartLine',
+                  isNotChart: true,
+                  config: {},
+                  compName: 'dv-decoration-6'
+                },
+                borderStyle: 'DvBorderBox12'
               }
             ],
             globalSetting: {
               themeBgColor: '',
-              themeBgImage: 'http://yuanbaoshuju.com/bigscreen/14/img/bg01.png',
+              themeBgImage: require('../../assets/bgSelection.png'),
               bgModeSelc: 'image',
               editAreaSize: {
                 w: 1920,

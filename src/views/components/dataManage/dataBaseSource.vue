@@ -7,6 +7,7 @@
         placeholder="请输入数据源名称搜索"
         append-icon="mdi-magnify"
         hide-details
+        height="36px"
         v-model="searchVal"
         @click:append="search"
         class="ml-2"
@@ -58,6 +59,7 @@
               dense
               label="数据源名称"
               hint="数据源名称可输入英文大小写/中文/数字/下划线,最多输入30个字符"
+              persistent-hint
               v-model="newSqlSource.sql_data_name"
             ></v-text-field>
             <v-text-field class="inputItem" outlined dense label="描述" v-model="newSqlSource.sql_data_describe"></v-text-field>
@@ -91,9 +93,12 @@
       disable-sort
       item-key="sql_data_id"
       absolute
+      @page-count="pageCount = $event"
+      :page.sync="page"
       :single-select="singleSelect"
       show-select
       :loading="sqlSourceFetching"
+      hide-default-footer
     >
       <template #item.actions="{ item }">
         <div class="d-flex">
@@ -108,6 +113,7 @@
         <v-btn color="primary" @click="initialize">刷新</v-btn>
       </template> -->
     </v-data-table>
+    <v-pagination v-model="page" :length="pageCount"></v-pagination>
     <v-dialog v-model="lookupSourceDialog" scrollable :overlay="false" max-width="600px" transition="dialog-transition">
       <v-card>
         <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">查看数据</v-card-title>
@@ -163,21 +169,27 @@ export default {
   components: { SvgIcon },
   data() {
     return {
+      page: 1,
+      pageCount: 10,
       dbHeaders: [
         {
           text: '名称',
+          align: 'center',
           value: 'sql_data_name'
         },
         {
           text: '描述',
+          align: 'center',
           value: 'sql_data_describe'
         },
         {
           text: '地址',
+          align: 'center',
           value: 'sql_data_ip'
         },
         {
           text: '操作',
+          align: 'center',
           value: 'actions'
         }
       ],

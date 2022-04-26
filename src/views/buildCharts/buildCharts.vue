@@ -39,27 +39,13 @@
                   </v-list-item-content>
                 </v-list-item>
               </v-list-group>
-              <!-- <v-list-item-group v-model="selectedItem" color="primary">
-                <v-list-item v-for="(item, i) in chartOptList" :key="i" ref="dragItem" @dragstart="currDragType = i">
-                  <v-list-item-icon>
-                    <svg-icon :icon-class="item.icon" className="chartIcon"></svg-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content draggable="true">
-                    <v-list-item-title v-text="i"></v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-group> -->
             </v-list>
           </v-card>
         </v-tab-item>
         <v-tab-item>
           <v-card flat class="px-2">
-            <!-- <v-subheader>主题选择</v-subheader>
-            <v-select :items="themeItems" outlined dense v-model="themeSelcted"></v-select> -->
             <v-subheader>画布尺寸</v-subheader>
             <v-select :items="screenSizeItems" v-model="screenSizeSelec" @change="setScreenSize" dense outlined></v-select>
-            <!--             <v-text-field suffix="px" dense outlined v-model="globalSetting.editAreaSize.w"></v-text-field>
-            <v-text-field suffix="px" dense outlined v-model="globalSetting.editAreaSize.h"></v-text-field> -->
             <v-subheader>背景</v-subheader>
             <v-radio-group v-model="globalSetting.bgModeSelc" row @change="setGlobalBg">
               <v-radio label="颜色" value="color"></v-radio>
@@ -108,8 +94,8 @@
     </v-card>
     <div>
       <div class="outBox">
-        <dv-border-box-10 :style="getEditAreaMatrix1()" id="editMain" class="editArea">
-          <dv-decoration-11 class="visualAnaTit">{{ globalSetting.title }}</dv-decoration-11>
+        <div :style="getEditAreaMatrix1()" id="editMain" class="editArea">
+          <!-- <dv-decoration-11 class="visualAnaTit">{{ globalSetting.title }}</dv-decoration-11> -->
           <vue-draggable-resizable
             v-for="item in draggableItems"
             :key="item.flag"
@@ -120,16 +106,18 @@
             @dragging="onDrag"
             @resizing="onResize"
             :parent="true"
-            :minWidth="200"
-            :minHeight="200"
+            :minWidth="50"
+            :minHeight="50"
+            :active="item.active"
             @deactivated="onDeactivated(item)"
             @activated="setActive(item)"
             :class="[{ active: item.active }, 'chartItem']"
             :draggable="item.draggable"
             :resizable="item.resizable"
           >
-            <div v-if="item.option.isNotChart" class="insideCharts" @contextmenu.prevent="onContextmenu(item)">
+            <div class="insideCharts" @contextmenu.prevent="onContextmenu(item)">
               <component
+                v-if="item.option.isNotChart"
                 :ref="item.id"
                 :style="`width:${item.width};height:${item.height};`"
                 :width="item.width"
@@ -137,16 +125,21 @@
                 :config="item.option.config"
                 :is="item.option.compName"
               ></component>
+              <!-- 使用plaintext-only而不是true避免内容出现tag或者换行符 -->
+              <div
+                v-else-if="item.option.isText"
+                class="textNode"
+                :style="getTextStyle(item)"
+                @blur="changeTextVal($event, item)"
+                contenteditable="plaintext-only"
+                v-html="item.option.text"
+              ></div>
+              <component v-else :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id">
+                <div :id="item.id" style="padding-top:20px" class="insideCharts"></div>
+              </component>
             </div>
-            <component :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id" v-else>
-              <div :id="item.id" class="insideCharts" style="padding-top:20px" @contextmenu.prevent="onContextmenu(item)"></div>
-            </component>
-            <!-- <p>
-              X: {{ item.x }} / Y: {{ item.y }} - Width: {{ item.width }} /
-              Height: {{ item.height }}
-            </p>-->
           </vue-draggable-resizable>
-        </dv-border-box-10>
+        </div>
       </div>
       <div class="scaleSlider">
         <!-- <v-slider
@@ -166,8 +159,8 @@
         <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">配置图表</v-card-title>
         <v-divider></v-divider>
         <div class="ma-5">
-          <v-text-field label="图表标题" v-model="currentChartOpt.option.title.text"></v-text-field>
-          <v-text-field label="副标题" v-model="currentChartOpt.option.title.subtext"></v-text-field>
+          <!-- <v-text-field label="图表标题" v-model="currentChartOpt.option.title.text"></v-text-field>
+          <v-text-field label="副标题" v-model="currentChartOpt.option.title.subtext"></v-text-field> -->
           <v-radio-group v-if="currentChartOpt.option.xAxis" v-model="currentChartOpt.option.xAxis.data" label="X轴">
             <v-radio v-for="(n, i) in dataSource.xAxis" :key="i" :label="`数据源 ${i + 1}`" :value="n"></v-radio>
           </v-radio-group>
@@ -198,7 +191,16 @@
             @change="borderStyleChange"
             item-value="value"
           ></v-select>
+          <div v-if="currentEditItem.option && currentEditItem.option.isText">
+            <v-text-field outlined dense label="字体大小" v-model="currentEditItem.option.fontSize"> </v-text-field>
+            <v-text-field outlined dense label="字体颜色" v-model="currentEditItem.option.color"> </v-text-field>
+            <v-text-field outlined dense label="文本内容" v-model="currentEditItem.option.text"> </v-text-field>
+          </div>
         </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="editChartsDialog = false">取消</v-btn>
+          <v-btn color="primary" @click="saveEditItem">确认</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -240,7 +242,6 @@ export default {
       },
       themeItems: ['浅色主题', '深色主题'],
       themeSelcted: '浅色主题',
-
       currentEditItem: {},
       editChartsDialog: false,
       borderSelected: [
@@ -263,7 +264,9 @@ export default {
       bgImages: [
         'http://yuanbaoshuju.com/bigscreen/5/img/bg.png',
         'http://yuanbaoshuju.com/bigscreen/14/img/bg01.png',
-        'http://yuanbaoshuju.com/bigscreen/25/images/map_bg.jpg'
+        'http://yuanbaoshuju.com/bigscreen/25/images/map_bg.jpg',
+        'https://ajreport.beliefteam.cn/file/download/af82eb9c-67b4-495d-8376-5f147f0b733b',
+        require('../../assets/bgSelection.png')
       ],
       imageSelected: 0,
       globalSetting: {
@@ -291,6 +294,9 @@ export default {
         this.editAreaMatrix.scaleX = val / 100
         this.editAreaMatrix.scaleY = val / 100
       }
+    },
+    activeItem() {
+      return this.draggableItems.find(v => v.active)
     }
   },
   watch: {},
@@ -306,10 +312,8 @@ export default {
     this.setWheelListener()
     this.setCursor()
     let modelInfo = this.$route.params.modelInfo
-    console.log(this.$route.params)
     if (modelInfo) {
       const { draggableItems, globalSetting } = modelInfo.model_info
-      console.log(draggableItems, globalSetting)
       this.draggableItems = draggableItems
       this.globalSetting = globalSetting
       this.loadCharts()
@@ -323,7 +327,7 @@ export default {
         this.draggableItems.forEach(v => {
           /* v.draggable = false
       v.resizable = false */
-          if (!v.option.isNotChart) {
+          if (!v.option.isNotChart && !v.option.isText) {
             this.createCharts(v.id, v.option)
           }
         })
@@ -347,18 +351,21 @@ export default {
       editArea.style.transform = `matrix(${scaleMultiple},0,0,${scaleMultiple},0,0)`
       this.editAreaMatrix.scaleX = scaleMultiple
       this.editAreaMatrix.scaleY = scaleMultiple
+      let { w, h } = this.globalSetting.editAreaSize
+      editArea.style.height = `${h}px`
+      editArea.style.width = `${w}px`
+      // let graphSize = `height:${h}px;width:${w}px;`
     },
     getEditAreaMatrix1() {
       let { scaleX, sknewX, sknewY, scaleY, translateX, translateY } = this.editAreaMatrix
-      let { w, h } = this.globalSetting.editAreaSize
       let scaAndPos = `transform:matrix(${scaleX},${sknewX},${sknewY},${scaleY},${translateX},${translateY});`
-      let graphSize = `height:${h}px;width:${w}px;`
-      return scaAndPos + graphSize
+      return scaAndPos
     },
     setWheelListener() {
       let outBox = document.querySelector('.outBox')
       let { scaleUnit } = this.chartAreaOpt
       outBox.addEventListener('mousewheel', e => {
+        let editArea = document.querySelector('#editMain')
         if (e.deltaY < 0) {
           this.editAreaMatrix.scaleX += scaleUnit
           this.editAreaMatrix.scaleY += scaleUnit
@@ -381,19 +388,18 @@ export default {
       }
     },
     setCursor() {
-      let outBox = document.querySelector('.outBox')
-
       let editBox = document.querySelector('#editMain')
-
       let _this = this
       editBox.addEventListener('mousedown', function wrapMousedown(e) {
+        e.stopPropagation()
         if (!e.srcElement.id && e.target.className != 'border-box-content') {
           return
         }
         this.style.cursor = 'grabbing'
         editBox.onmousemove = function wrapMouseout(e) {
-          let tarX = e.movementX
-          let tarY = e.movementY
+          e.stopPropagation()
+          let tarX = e.movementX * _this.editAreaMatrix.scaleX
+          let tarY = e.movementY * _this.editAreaMatrix.scaleX
           _this.editAreaMatrix.translateX += tarX
           _this.editAreaMatrix.translateY += tarY
         }
@@ -407,16 +413,6 @@ export default {
         editBox.onmousemove = null
       })
     },
-    // getEditAreaMatrix(p1, p2) {
-    //   let editArea = document.querySelector("#editMain");
-    //   let editAreaScaleStr = getComputedStyle(editArea).transform;
-    //   let editAreaScale = editAreaScaleStr
-    //     .slice(editAreaScaleStr.indexOf("(") + 1, editAreaScaleStr.indexOf(")"))
-    //     .split(",")
-    //     .map(Number);
-    //   editAreaScale = editAreaScale.map(Number);
-    //   return editAreaScale;
-    // },
     dragInit() {
       let endArea = document.querySelector('.editArea')
       endArea.addEventListener('dragenter', event => {})
@@ -424,28 +420,32 @@ export default {
       endArea.addEventListener('dragover', event => {
         event.preventDefault()
       })
+      let _this = this
       endArea.addEventListener('drop', e => {
         let fatherboxMess = endArea.getBoundingClientRect()
-
         //创建图将前一个图的active取消
         let activeItem = this.draggableItems.find(v => v.active)
         activeItem ? (activeItem.active = false) : ''
+        let scale = _this.editAreaMatrix.scaleX
         let editCharts = {
           id: GenNonDuplicateID(8),
           width: 200,
           height: 200,
-          x: ~~(e.x - fatherboxMess.x),
-          y: ~~(e.y - fatherboxMess.y),
+          /* 放置的位置为 （鼠标位置 - 编辑区域的位置）/编辑区域缩放的倍数 */
+          x: (e.x - fatherboxMess.x) / scale,
+          y: (e.y - fatherboxMess.y) / scale,
           active: true,
           type: this.currDragType,
           flag: null,
-          option: this.chartOptList[this.currDragType] ? this.chartOptList[this.currDragType] : this.specCompOptList[this.currDragType],
+          option: Object.assign({}, this.chartOptList[this.currDragType] || this.specCompOptList[this.currDragType]),
           borderStyle: 'DvBorderBox12'
         }
-
         editCharts.flag = editCharts.id
-        console.log(editCharts)
-        if (editCharts.option.isNotChart) {
+        if (editCharts.option.isNotChart || editCharts.option.isText) {
+          if (editCharts.option.isText) {
+            editCharts.width = 150
+            editCharts.height = 50
+          }
           this.draggableItems.push(editCharts)
         } else {
           this.currentChartOpt = editCharts
@@ -453,7 +453,9 @@ export default {
         }
       })
     },
-
+    changeTextVal(e, item) {
+      item.option.text = e.target.innerHTML
+    },
     //
     logMessage() {
       console.log(this.draggableItems)
@@ -475,7 +477,6 @@ export default {
             disabled: false,
             icon: '',
             onClick: () => {
-              this.currentEditItem = target
               this.editChartsDialog = true
             }
           }
@@ -511,6 +512,20 @@ export default {
       let h = e.slice(e.indexOf('*') + 1, e.length)
       this.globalSetting.editAreaSize.w = w
       this.globalSetting.editAreaSize.h = h
+      let editArea = document.querySelector('#editMain')
+      editArea.style.height = `${h}px`
+      editArea.style.width = `${w}px`
+    },
+    saveEditItem() {
+      const { id } = this.currentEditItem
+      this.draggableItems.forEach(v => {
+        if (v.id == id) {
+          v.option = this.currentEditItem.option
+          v.borderStyle = this.currentEditItem.borderStyle
+        }
+      })
+      this.borderStyleChange()
+      this.editChartsDialog = false
     }
   }
 }
@@ -544,6 +559,7 @@ export default {
   background: url('../../assets/point.png');
   // width: @outerWidth;
   // height: @outerHeight;
+
   .visualAnaTit {
     width: 400px;
     height: 100px;
@@ -565,10 +581,22 @@ export default {
     position: relative;
     background-repeat: no-repeat;
     background-size: contain;
+    /* &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(-90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px) 0% 0% / 50px 50px,
+        linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px) 0% 0% / 50px 50px;
+    } */
     .insideCharts {
       background-color: inherit;
       width: 100%;
       height: 100%;
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
     }
   }
 }
@@ -579,7 +607,7 @@ export default {
   right: 100px;
 }
 .active {
-  background: #eeeeee;
+  background: rgba(0, 0, 0, 0.1);
   box-shadow: 0px 5px 9px 0px rgba(0, 0, 0, 0.5);
 }
 .chartItem {
@@ -593,6 +621,18 @@ export default {
   //   linear-gradient(to left, #2cd5ff, #2cd5ff) right bottom no-repeat,
   //   linear-gradient(to left, #2cd5ff, #2cd5ff) right bottom no-repeat;
   // background-size: 4px 20px, 20px 4px, 4px 20px, 20px 4px;
-  border: 0px solid #073f97;
+  border: 0px;
+  .textNode {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    overflow: hidden;
+  }
 }
 </style>

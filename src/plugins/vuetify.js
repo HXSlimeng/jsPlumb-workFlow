@@ -1,6 +1,15 @@
-import Vue from 'vue'
-import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
-import Vuetify, { VApp, VCard, VBtn, VDialog, VList, VListItem, VSelect, VForm } from 'vuetify/lib'
+import Vue from 'vue' // Ensure you are using css-loader
+import '@mdi/font/css/materialdesignicons.css'
+import Vuetify /* , {
+  VApp,
+  VCard,
+  VBtn,
+  VDialog,
+  VList,
+  VListItem,
+  VSelect,
+  VForm
+}  */ from 'vuetify/lib'
 
 Vue.use(Vuetify, {
   // components:{ VApp,VCard,VBtn,VDialog,VList,VListItem,VSelect,VForm },

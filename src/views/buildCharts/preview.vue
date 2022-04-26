@@ -1,7 +1,7 @@
 <template>
   <div class="outBox">
     <div class="editArea" id="topOuter" :style="globalStyleStr">
-      <dv-decoration-11 class="visualAnaTit">{{ globalSetting.title }}</dv-decoration-11>
+      <!-- <dv-decoration-11 class="visualAnaTit">{{ globalSetting.title }}</dv-decoration-11> -->
       <vue-draggable-resizable
         v-for="item in draggableItems"
         :key="item.id"
@@ -17,7 +17,7 @@
         :draggable="false"
         :resizable="false"
       >
-        <div v-if="item.option.isNotChart" class="insideCharts" @contextmenu.prevent="onContextmenu(item)">
+        <!-- <div v-if="item.option.isNotChart" class="insideCharts" @contextmenu.prevent="onContextmenu(item)">
           <component
             :ref="item.id"
             :style="`width:${item.width};height:${item.height};`"
@@ -29,8 +29,24 @@
         </div>
         <component :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id" v-else>
           <div :id="item.id" class="insideCharts" style="padding-top:20px"></div>
-        </component>
-
+        </component> -->
+        <div class="insideCharts" @contextmenu.prevent="onContextmenu(item)">
+          <component
+            v-if="item.option.isNotChart"
+            :ref="item.id"
+            :style="`width:${item.width};height:${item.height};`"
+            :width="item.width"
+            :height="item.height"
+            :config="item.option.config"
+            :is="item.option.compName"
+          ></component>
+          <div v-else-if="item.option.isText" class="textNode" :style="getTextStyle(item)">
+            {{ item.option.text }}
+          </div>
+          <component v-else :is="item.borderStyle ? item.borderStyle : 'emptyBorder'" :ref="item.id">
+            <div :id="item.id" style="padding-top:20px" class="insideCharts"></div>
+          </component>
+        </div>
         <!-- <p>
               X: {{ item.x }} / Y: {{ item.y }} - Width: {{ item.width }} /
               Height: {{ item.height }}
@@ -104,6 +120,9 @@ export default {
     this.setEditStyle()
     this.loadCharts()
     this.resizeScale('topOuter')
+  },
+  destroyed() {
+    window.onresize = null
   }
 }
 </script>
@@ -141,6 +160,19 @@ export default {
   }
   .chartItem {
     border: 0px solid #8a8a8a;
+  }
+  .textNode {
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
   }
 }
 </style>

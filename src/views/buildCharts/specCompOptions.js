@@ -50,8 +50,76 @@ const specCompOpt = {
   水位图: {
     icon: 'chartLine',
     isNotChart: true,
-    config: { data: [66] },
+    config: {},
     compName: 'dv-water-level-pond'
+  },
+  dvDecoration1: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-1'
+  },
+  dvDecoration2: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-2'
+  },
+  dvDecoration3: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-3'
+  },
+  dvDecoration4: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-4'
+  },
+  dvDecoration5: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-5'
+  },
+  dvDecoration6: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-6'
+  },
+  dvDecoration8: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-8'
+  },
+  dvDecoration9: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-9'
+  },
+  dvDecoration10: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-10'
+  },
+  dvDecoration12: {
+    icon: 'chartLine',
+    isNotChart: true,
+    config: {},
+    compName: 'dv-decoration-12'
+  },
+
+  文字: {
+    icon: 'chartLine',
+    isText: true,
+    text: '',
+    color: 'rgb(162, 203, 239)',
+    fontSize: 32
   }
 }
 export default specCompOpt

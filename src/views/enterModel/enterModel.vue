@@ -167,7 +167,6 @@
                     <div class="text-h6 rOverlayTit">帮助信息:</div>
                   </template>
                 </v-text-field>
-                <v-switch v-model="rightOverlay.info.train_params.submit_result" label="节点是否返回节点计算结果"></v-switch>
                 <v-text-field
                   v-if="rightOverlay.info.node_result"
                   v-model="rightOverlay.info.node_result.addtional_node_info"
@@ -180,7 +179,7 @@
                   </template>
                 </v-text-field>
                 <v-expansion-panels :accordion="true">
-                  <v-expansion-panel>
+                  <!-- <v-expansion-panel>
                     <v-expansion-panel-header color="#daeaf6">train_params</v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <v-list>
@@ -212,9 +211,9 @@
                         </v-list-item>
                       </v-list>
                     </v-expansion-panel-content>
-                  </v-expansion-panel>
+                  </v-expansion-panel> -->
                   <v-expansion-panel>
-                    <v-expansion-panel-header color="#daeaf6">addtional_node_info</v-expansion-panel-header>
+                    <v-expansion-panel-header color="#daeaf6">附加信息</v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <v-list v-if="rightOverlay.info.node_result">
                         <v-list-item v-for="(v, index) in rightOverlay.info.node_result.addtional_node_info" :key="index">

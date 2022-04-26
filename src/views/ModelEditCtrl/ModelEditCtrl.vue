@@ -62,6 +62,7 @@
         show-select
         :loading="dataLifetching"
         loading-text="数据加载中"
+        hide-default-footer
       >
         <template v-slot:top>
           <v-dialog v-model="editDialog" max-width="500px">
@@ -113,11 +114,7 @@
           <div class="d-flex editBtns">
             <v-btn @click="enterViewModel(item, 'MODEL')" text color="primary" dark>模型编辑</v-btn>
             <v-btn @click="enterViewModel(item, 'MODEL')" text color="primary" dark>模型查看</v-btn>
-            <!-- <v-btn fab x-small text color="primary" @click="editItem(item)">
-              <v-icon small>mdi-pencil</v-icon>
-            </v-btn> -->
             <v-btn text color="primary" @click="deleteItem(item)">
-              <!-- <v-icon small dark>mdi-delete</v-icon> -->
               删除
             </v-btn>
           </div>
@@ -129,18 +126,7 @@
           </v-btn>
         </template>
       </v-data-table>
-      <!-- <div class="text-center pt-2">
-        <v-pagination v-model="page" :length="pageCount"></v-pagination>
-        <v-text-field
-          :value="itemsPerPage"
-          label="Items per page"
-          type="number"
-          min="-1"
-          v-if="false"
-          max="15"
-          @input="itemsPerPage = parseInt($event, 10)"
-        ></v-text-field>
-      </div> -->
+      <v-pagination v-model="page" :length="pageCount"></v-pagination>
     </div>
   </div>
 </template>
@@ -163,12 +149,12 @@ export default {
       modelHeaders: [
         {
           text: '模型名称',
-          align: 'start',
+          align: 'center',
           value: 'graph_name'
         },
-        { text: '描述', value: 'graph_describe' },
-        { text: '创建时间', value: 'create_time' },
-        { text: '操作', value: 'actions' }
+        { text: '描述', align: 'center', value: 'graph_describe' },
+        { text: '创建时间', align: 'center', value: 'create_time' },
+        { text: '操作', align: 'center', value: 'actions' }
       ],
       desserts: [],
       defaultItem: {

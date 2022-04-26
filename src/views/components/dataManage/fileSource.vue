@@ -94,8 +94,11 @@
       :single-select="singleSelect"
       show-select
       :loading="dbSourceFetching"
+      hide-default-footer
+      @page-count="pageCount = $event"
+      :page.sync="page"
     >
-      <template #item.actions="{ item }">
+      <template #item.actions="{ item }" class="d-flex justify-center">
         <div class="d-flex">
           <v-btn color="primary" text @click="editeFileSource(item)">编辑</v-btn>
           <!-- <v-btn color="primary" text @click="openLookupDialog(item)">查看</v-btn> -->
@@ -103,6 +106,7 @@
         </div>
       </template>
     </v-data-table>
+    <v-pagination v-model="page" :length="pageCount"></v-pagination>
     <v-dialog v-model="lookupSourceDialog" scrollable :overlay="false" max-width="600px" transition="dialog-transition">
       <v-card>
         <v-card-title class="px-5 py-2 text-body-1 grey lighten-2">查看数据</v-card-title>
@@ -127,13 +131,18 @@ import { file_save, file_query, file_delete, file_update } from '@/request/apis/
 export default {
   data() {
     return {
+      page: 1,
+      pageCount: 10,
       dbHeaders: [
         {
           text: '名称',
+          align: 'center',
           value: 'file_name'
         },
         {
           text: '描述',
+          align: 'center',
+
           value: 'file_describe'
         },
         /* {
@@ -142,10 +151,12 @@ export default {
         }, */
         {
           text: '文件类型',
+          align: 'center',
           value: 'file_type'
         },
         {
           text: '操作',
+          align: 'center',
           value: 'actions'
         }
       ],

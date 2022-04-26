@@ -1,10 +1,5 @@
 const chartOptions = {
   pie: {
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center'
-    },
     tooltip: {
       trigger: 'item'
     },
@@ -37,11 +32,7 @@ const chartOptions = {
   },
   bar: {
     darkMode: 'auto',
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center'
-    },
+    title: {},
     xAxis: {
       type: 'category',
       data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -63,17 +54,13 @@ const chartOptions = {
   },
   line: {
     darkMode: 'auto',
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center'
-    },
+    title: {},
     xAxis: {
       type: 'category',
       data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     },
     yAxis: {
-      type: 'value'
+    type: 'value'
     },
     series: [
       {
@@ -86,11 +73,7 @@ const chartOptions = {
   scatter: {
     xAxis: {},
     yAxis: {},
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center'
-    },
+    title: {},
     series: [
       {
         symbolSize: 20,
